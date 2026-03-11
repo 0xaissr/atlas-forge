@@ -4,7 +4,7 @@ const MAX_HISTORY = 50;
 
 export interface UndoState<T> {
   state: T;
-  setState: (newState: T) => void;
+  setState: (newStateOrUpdater: T | ((current: T) => T)) => void;
   undo: () => void;
   redo: () => void;
   canUndo: boolean;
@@ -17,8 +17,12 @@ export function useUndo<T>(initialState: T): UndoState<T> {
   const futureRef = useRef<T[]>([]);
 
   const setState = useCallback(
-    (newState: T) => {
+    (newStateOrUpdater: T | ((current: T) => T)) => {
       setInternalState((current) => {
+        const newState =
+          typeof newStateOrUpdater === "function"
+            ? (newStateOrUpdater as (current: T) => T)(current)
+            : newStateOrUpdater;
         pastRef.current = [...pastRef.current, current].slice(-MAX_HISTORY);
         futureRef.current = [];
         return newState;

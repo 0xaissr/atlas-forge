@@ -47,9 +47,9 @@ export function SpriteProvider({ children }: { children: React.ReactNode }) {
 
   const dispatch = useCallback(
     (action: SpriteAction) => {
-      setState(spriteReducer(sprites, action));
+      setState((current) => spriteReducer(current, action));
     },
-    [sprites, setState]
+    [setState]
   );
 
   return (
