@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { splitGrid } from "@/lib/split-grid";
+import { filterEmptySprites } from "@/lib/filter-empty";
 import { useSprites } from "@/store/sprite-context";
 
 interface GridSettingsProps {
@@ -28,7 +29,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
       return;
     }
 
-    const sprites = splitGrid({
+    let sprites = splitGrid({
       imageWidth: image.naturalWidth,
       imageHeight: image.naturalHeight,
       cellWidth,
@@ -39,8 +40,18 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
       fileName,
     });
 
+    if (filterEmpty) {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(image, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      sprites = filterEmptySprites(imageData, sprites);
+    }
+
     dispatch({ type: "SET_SPRITES", sprites });
-  }, [cellWidth, cellHeight, offsetX, offsetY, spacing, image, fileName, dispatch]);
+  }, [cellWidth, cellHeight, offsetX, offsetY, spacing, filterEmpty, image, fileName, dispatch]);
 
   useEffect(() => {
     applyGrid();
