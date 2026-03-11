@@ -21,6 +21,8 @@ function EditorLayout({
 }) {
   const [splitMode, setSplitMode] = useState<SplitMode>("grid");
   const [selectedSpriteId, setSelectedSpriteId] = useState<string | null>(null);
+  const [pickingBgColor, setPickingBgColor] = useState(false);
+  const [bgColor, setBgColor] = useState<[number, number, number] | null>(null);
   const { sprites, dispatch, undo, redo, canUndo, canRedo } = useSprites();
 
   // Keyboard shortcuts: Delete, Undo, Redo
@@ -83,12 +85,35 @@ function EditorLayout({
       <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
         {/* Canvas */}
         <div className="relative min-h-[40vh] flex-1 md:min-h-0">
+          {pickingBgColor && (
+            <div className="absolute inset-0 z-10 flex cursor-crosshair items-center justify-center bg-black/30">
+              <span className="rounded bg-black/70 px-3 py-1.5 text-sm text-white">
+                Click on the background to pick color
+              </span>
+            </div>
+          )}
           <CanvasPreview
             image={image}
             sprites={sprites}
             selectedSpriteId={selectedSpriteId}
-            onSpriteSelect={setSelectedSpriteId}
+            onSpriteSelect={(id) => {
+              if (pickingBgColor) return;
+              setSelectedSpriteId(id);
+            }}
             dispatch={dispatch}
+            onCanvasClick={pickingBgColor ? (x, y) => {
+              // Sample color from image at (x, y)
+              const canvas = document.createElement("canvas");
+              canvas.width = image.naturalWidth;
+              canvas.height = image.naturalHeight;
+              const ctx = canvas.getContext("2d")!;
+              ctx.drawImage(image, 0, 0);
+              const px = Math.round(Math.max(0, Math.min(x, image.naturalWidth - 1)));
+              const py = Math.round(Math.max(0, Math.min(y, image.naturalHeight - 1)));
+              const pixel = ctx.getImageData(px, py, 1, 1).data;
+              setBgColor([pixel[0], pixel[1], pixel[2]]);
+              setPickingBgColor(false);
+            } : undefined}
           />
         </div>
 
@@ -100,6 +125,8 @@ function EditorLayout({
             image={image}
             fileName={fileName}
             sprites={sprites}
+            onPickBgColor={() => setPickingBgColor(true)}
+            bgColor={bgColor}
           />
           <div className="shrink-0 border-t border-border">
             <SpriteList

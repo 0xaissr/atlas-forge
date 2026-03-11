@@ -11,6 +11,7 @@ interface CanvasPreviewProps {
   selectedSpriteId: string | null;
   onSpriteSelect: (id: string | null) => void;
   dispatch: (action: SpriteAction) => void;
+  onCanvasClick?: (imageX: number, imageY: number) => void;
 }
 
 // Canvas drawing colors — switch based on dark mode
@@ -50,6 +51,7 @@ export function CanvasPreview({
   selectedSpriteId,
   onSpriteSelect,
   dispatch,
+  onCanvasClick,
 }: CanvasPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -256,10 +258,21 @@ export function CanvasPreview({
   // Merged mouse handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (onCanvasClick) {
+        // Pick color mode: convert screen coords to image coords
+        const rect = e.currentTarget.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const screenX = (e.clientX - rect.left) * dpr;
+        const screenY = (e.clientY - rect.top) * dpr;
+        const imageX = (screenX - offsetX) / scale;
+        const imageY = (screenY - offsetY) / scale;
+        onCanvasClick(imageX, imageY);
+        return;
+      }
       onPanMouseDown(e);
       onInteractionMouseDown(e);
     },
-    [onPanMouseDown, onInteractionMouseDown]
+    [onPanMouseDown, onInteractionMouseDown, onCanvasClick, offsetX, offsetY, scale]
   );
 
   const handleMouseMove = useCallback(

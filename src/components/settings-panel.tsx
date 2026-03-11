@@ -14,6 +14,8 @@ interface SettingsPanelProps {
   image: HTMLImageElement;
   fileName: string;
   sprites: SpriteRect[];
+  onPickBgColor?: () => void;
+  bgColor: [number, number, number] | null;
 }
 
 const TAB_MAP: Record<string, SplitMode> = {
@@ -34,6 +36,8 @@ export function SettingsPanel({
   image,
   fileName,
   sprites,
+  onPickBgColor,
+  bgColor,
 }: SettingsPanelProps) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -68,7 +72,7 @@ export function SettingsPanel({
           </TabsContent>
 
           <TabsContent value="1">
-            <RectangularSettings image={image} fileName={fileName} />
+            <RectangularSettings image={image} fileName={fileName} onPickBgColor={onPickBgColor} bgColor={bgColor} />
           </TabsContent>
 
           <TabsContent value="2">
