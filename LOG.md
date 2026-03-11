@@ -1,0 +1,28 @@
+## 2026-03-11
+- [0a33831] 新增 spritesheet-to-atlas 設計文件
+- [296ee3a] 新增 spritesheet-to-atlas 實作計畫
+- [955adbc] feat: initial commit
+- [8b67410] 初始化專案：安裝 jszip、file-saver 及 shadcn/ui 元件
+- [277cf2e] 實作 Cyberpunk 主題系統：深色/淺色模式切換
+- [21c271e] 新增核心型別定義與狀態管理（Task 3）
+- [b6fb89c] 新增圖片上傳元件（Task 4）
+- [caa096f] 新增 Canvas 預覽元件與縮放平移功能（Task 5）
+- [4260af5] 新增右側設定面板框架與完整編輯器 layout（Task 6）
+- [4fe5a3d] 實作 Grid 切割模式：splitGrid 純函式與 GridSettings UI 元件（Task 7）
+- [4f3db5c] 實作 Rectangular 自動偵測模式：detectSprites 純函式、Web Worker 與 UI 元件（Task 8）
+- [cdcf06a] 實作 Data File 解析模式：支援 TexturePacker JSON 與 Cocos plist 格式匯入（Task 9）
+- [50dc6b4] 實作 Sprite 微調互動功能：拖曳 Handle 調整大小、Sprite 列表面板、鍵盤快捷鍵（Task 10）
+- [1589ff4] 新增 Cocos Creator Plist 匯出功能：exportCocosPlist 純函式與完整測試（Task 11）
+- [175adf1] 新增 Unity .png.meta 匯出功能：exportUnityMeta 純函式與完整測試（Task 12）
+- [20f0745] 實作重新打包模式（Bin Packing）：MaxRects BSSF 演算法、repackAtlas 函式與 Web Worker（Task 13）
+- [b6f01d1] 實作下載功能與匯出整合：ExportSettings UI 元件、downloadAtlas 下載函式，串接 Cocos/Unity 匯出與 Repack 模式（Task 14）
+- [97dc65d] 實作過濾空白格功能：filterEmptySprites 純函式檢測全透明 sprite 並過濾，整合至 GridSettings 元件（Task 15）
+- [be82471] 最終整合與 Polish：響應式佈局、重新上傳按鈕、錯誤處理、metadata 優化（Task 16）
+- [f1367f5] 修復 dispatch 造成的無限迴圈
+- [ea27d02] 在 body 加入 suppressHydrationWarning 避免瀏覽器擴充套件造成的 hydration 警告
+- [8e418d6] 新增背景色取樣功能解決非透明背景的自動偵測問題
+- [bca2765] 重構右側面板為 Split/Export 兩個主頁籤
+- [c8ac190] 修復 Worker 中 @/ 路徑別名無法解析導致偵測卡住的問題
+- [650284e] 改為純 client-side rendering 徹底解決 hydration 警告
+- [4f889fb] 移除 Web Worker 改為主線程直接執行偵測
+- [423d49a] 升級 Cocos plist 輸出至 format 3 並支援 format 3 解析
