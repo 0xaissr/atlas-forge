@@ -11,12 +11,17 @@ const ACCEPTED_MIME = ["image/png", "image/jpeg", "image/webp"];
 
 export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(
     (file: File) => {
-      if (!ACCEPTED_MIME.includes(file.type)) return;
+      if (!ACCEPTED_MIME.includes(file.type)) {
+        setError(`不支援的檔案格式：${file.name}。請使用 PNG、JPG 或 WebP 格式。`);
+        return;
+      }
 
+      setError(null);
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
@@ -24,6 +29,7 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
+        setError(`無法載入圖片：${file.name}`);
       };
       img.src = url;
     },
@@ -96,6 +102,10 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
       <p className="text-sm text-muted-foreground">
         支援格式：PNG、JPG、JPEG、WebP
       </p>
+
+      {error && (
+        <p className="mt-2 text-sm font-medium text-destructive">{error}</p>
+      )}
 
       <input
         ref={inputRef}

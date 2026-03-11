@@ -19,8 +19,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Spritesheet to Atlas",
-  description: "Convert spritesheets to texture atlas format",
+  title: "Spritesheet to Atlas - Texture Atlas Generator",
+  description:
+    "Split spritesheets into individual sprites and export as Cocos Creator or Unity texture atlas. Supports grid, rectangular detection, and data file import.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

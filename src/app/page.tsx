@@ -7,14 +7,17 @@ import { CanvasPreview } from "@/components/canvas-preview";
 import { SettingsPanel } from "@/components/settings-panel";
 import { SpriteList } from "@/components/sprite-list";
 import { SpriteProvider, useSprites } from "@/store/sprite-context";
+import { RotateCcw } from "lucide-react";
 import type { SplitMode } from "@/types";
 
 function EditorLayout({
   image,
   fileName,
+  onReset,
 }: {
   image: HTMLImageElement;
   fileName: string;
+  onReset: () => void;
 }) {
   const [splitMode, setSplitMode] = useState<SplitMode>("grid");
   const [selectedSpriteId, setSelectedSpriteId] = useState<string | null>(null);
@@ -63,13 +66,23 @@ function EditorLayout({
         <h1 className="font-[family-name:var(--font-jetbrains-mono)] text-lg font-bold tracking-tight text-foreground dark:text-primary dark:drop-shadow-[0_0_8px_var(--color-primary)]">
           Spritesheet to Atlas
         </h1>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onReset}
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            title="Upload new image"
+          >
+            <RotateCcw className="size-3.5" />
+            New
+          </button>
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Main area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
         {/* Canvas */}
-        <div className="flex-1 relative">
+        <div className="relative min-h-[40vh] flex-1 md:min-h-0">
           <CanvasPreview
             image={image}
             sprites={sprites}
@@ -80,7 +93,7 @@ function EditorLayout({
         </div>
 
         {/* Settings Panel + Sprite List */}
-        <div className="flex h-full w-80 flex-col border-l border-border bg-card/80 backdrop-blur-sm">
+        <div className="flex w-full flex-col border-t border-border bg-card/80 backdrop-blur-sm md:h-full md:w-80 md:border-l md:border-t-0">
           <SettingsPanel
             splitMode={splitMode}
             onSplitModeChange={setSplitMode}
@@ -112,6 +125,14 @@ export default function Home() {
     []
   );
 
+  const handleReset = useCallback(() => {
+    if (image?.src) {
+      URL.revokeObjectURL(image.src);
+    }
+    setImage(null);
+    setFileName("");
+  }, [image]);
+
   if (!image) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-8">
@@ -127,7 +148,7 @@ export default function Home() {
 
   return (
     <SpriteProvider>
-      <EditorLayout image={image} fileName={fileName} />
+      <EditorLayout image={image} fileName={fileName} onReset={handleReset} />
     </SpriteProvider>
   );
 }
