@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Loader2, Scan, Pipette } from "lucide-react";
 import { useSprites } from "@/store/sprite-context";
+import { detectSprites } from "@/lib/detect-sprites";
 import type { SpriteRect } from "@/types";
 
 interface RectangularSettingsProps {
@@ -13,6 +14,16 @@ interface RectangularSettingsProps {
   fileName: string;
   onPickBgColor?: () => void;
   bgColor: [number, number, number] | null;
+}
+
+function colorDistance(
+  r1: number, g1: number, b1: number,
+  r2: number, g2: number, b2: number
+): number {
+  const dr = r1 - r2;
+  const dg = g1 - g2;
+  const db = b1 - b2;
+  return Math.sqrt(dr * dr + dg * dg + db * db);
 }
 
 export function RectangularSettings({
@@ -27,69 +38,60 @@ export function RectangularSettings({
   const [bgTolerance, setBgTolerance] = useState(30);
   const [minSize, setMinSize] = useState(4);
   const [detecting, setDetecting] = useState(false);
-  const workerRef = useRef<Worker | null>(null);
   const hasAutoDetected = useRef(false);
-
-  // Cleanup worker on unmount
-  useEffect(() => {
-    return () => {
-      workerRef.current?.terminate();
-      workerRef.current = null;
-    };
-  }, []);
 
   const detect = useCallback(() => {
     setDetecting(true);
 
-    // Terminate previous worker if any
-    workerRef.current?.terminate();
+    // Use requestAnimationFrame to let the UI update (show spinner) before blocking
+    requestAnimationFrame(() => {
+      try {
+        // Draw image to offscreen canvas to get ImageData
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(image, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    // Draw image to offscreen canvas to get ImageData
-    const canvas = document.createElement("canvas");
-    canvas.width = image.naturalWidth;
-    canvas.height = image.naturalHeight;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(image, 0, 0);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const rgba = imageData.data;
+        const totalPixels = canvas.width * canvas.height;
+        const alphaData = new Uint8Array(totalPixels);
 
-    // Create worker
-    const worker = new Worker(
-      new URL("../workers/detect-sprites.worker.ts", import.meta.url)
-    );
-    workerRef.current = worker;
+        for (let i = 0; i < totalPixels; i++) {
+          const r = rgba[i * 4];
+          const g = rgba[i * 4 + 1];
+          const b = rgba[i * 4 + 2];
+          const a = rgba[i * 4 + 3];
 
-    worker.onmessage = (event: MessageEvent<SpriteRect[] | { error: string }>) => {
-      const data = event.data;
-      if (data && "error" in data) {
-        console.error("Detection worker error:", data.error);
+          if (bgColor && a > alphaThreshold) {
+            const dist = colorDistance(r, g, b, bgColor[0], bgColor[1], bgColor[2]);
+            alphaData[i] = dist <= bgTolerance ? 0 : a;
+          } else {
+            alphaData[i] = a;
+          }
+        }
+
+        let sprites = detectSprites(alphaData, canvas.width, canvas.height, alphaThreshold, padding);
+
+        // Filter out sprites smaller than minSize
+        if (minSize > 0) {
+          sprites = sprites.filter(s => s.width >= minSize && s.height >= minSize);
+        }
+
+        // Re-assign IDs and names
+        sprites.forEach((sprite, index) => {
+          sprite.id = `rect-${index}`;
+          sprite.name = `${fileName}-${index}`;
+        });
+
+        dispatch({ type: "SET_SPRITES", sprites });
+      } catch (err) {
+        console.error("Detection failed:", err);
+      } finally {
         setDetecting(false);
-        return;
       }
-      dispatch({ type: "SET_SPRITES", sprites: data as SpriteRect[] });
-      setDetecting(false);
-    };
-
-    worker.onerror = (e) => {
-      console.error("Detection worker failed:", e);
-      setDetecting(false);
-    };
-
-    // Transfer the buffer for performance
-    const buffer = imageData.data.buffer;
-    worker.postMessage(
-      {
-        imageData: buffer,
-        width: canvas.width,
-        height: canvas.height,
-        alphaThreshold,
-        padding,
-        fileName,
-        bgColor,
-        bgTolerance,
-        minSize,
-      },
-      [buffer]
-    );
+    });
   }, [image, alphaThreshold, padding, fileName, dispatch, bgColor, bgTolerance, minSize]);
 
   // Auto-detect on first render
