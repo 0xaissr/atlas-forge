@@ -3,6 +3,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Grid3X3, Box, FileText, Download } from "lucide-react";
 import { GridSettings } from "@/components/grid-settings";
+import { RectangularSettings } from "@/components/rectangular-settings";
 import type { SplitMode } from "@/types";
 
 interface SettingsPanelProps {
@@ -63,17 +64,7 @@ export function SettingsPanel({
           </TabsContent>
 
           <TabsContent value="1">
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground">
-                Rectangular Split
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                自動偵測透明邊界，找出每個 sprite 的外框。
-              </p>
-              <div className="rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
-                設定項目將在後續實作
-              </div>
-            </div>
+            <RectangularSettings image={image} fileName={fileName} />
           </TabsContent>
 
           <TabsContent value="2">
