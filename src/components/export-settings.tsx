@@ -1,0 +1,188 @@
+"use client";
+
+import { useState } from "react";
+import { Download, Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { SpriteRect, ExportSettings as ExportSettingsType, ExportEngine, ExportMode } from "@/types";
+import { downloadAtlas } from "@/lib/export-download";
+
+interface ExportSettingsProps {
+  image: HTMLImageElement;
+  fileName: string;
+  sprites: SpriteRect[];
+}
+
+export function ExportSettings({ image, fileName, sprites }: ExportSettingsProps) {
+  const [engine, setEngine] = useState<ExportEngine>("cocos");
+  const [mode, setMode] = useState<ExportMode>("original");
+  const [maxSize, setMaxSize] = useState<1024 | 2048 | 4096>(2048);
+  const [padding, setPadding] = useState(1);
+  const [trim, setTrim] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [overflow, setOverflow] = useState<string[]>([]);
+
+  const hasSprites = sprites.length > 0;
+
+  const handleDownload = async () => {
+    setLoading(true);
+    setError(null);
+    setOverflow([]);
+
+    try {
+      const settings: ExportSettingsType = {
+        engine,
+        mode,
+        maxSize,
+        padding,
+        trim,
+      };
+
+      const result = await downloadAtlas({
+        sprites,
+        image,
+        fileName,
+        settings,
+      });
+
+      if (!result.success) {
+        setError(result.error ?? "Export failed");
+      } else if (result.overflow && result.overflow.length > 0) {
+        setOverflow(result.overflow);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-medium text-foreground">Export Settings</h3>
+
+      {/* Engine */}
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Engine</Label>
+        <Select value={engine} onValueChange={(val) => setEngine(val as ExportEngine)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cocos">Cocos Creator</SelectItem>
+            <SelectItem value="unity">Unity</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Mode */}
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Mode</Label>
+        <Select value={mode} onValueChange={(val) => setMode(val as ExportMode)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="original">Original</SelectItem>
+            <SelectItem value="repack">Repack</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Repack options */}
+      {mode === "repack" && (
+        <div className="space-y-3 rounded-md border border-border p-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Max Size</Label>
+            <Select
+              value={String(maxSize)}
+              onValueChange={(val) => setMaxSize(Number(val) as 1024 | 2048 | 4096)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1024">1024</SelectItem>
+                <SelectItem value="2048">2048</SelectItem>
+                <SelectItem value="4096">4096</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Padding</Label>
+            <Input
+              type="number"
+              min={0}
+              max={4}
+              value={padding}
+              onChange={(e) => {
+                const v = Math.min(4, Math.max(0, Number(e.target.value) || 0));
+                setPadding(v);
+              }}
+              className="h-8"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={trim}
+              onCheckedChange={(checked) => setTrim(checked === true)}
+              id="trim-checkbox"
+            />
+            <Label htmlFor="trim-checkbox" className="text-xs text-muted-foreground cursor-pointer">
+              Trim transparent pixels
+            </Label>
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="flex items-start gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-2 text-xs text-destructive">
+          <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Overflow warning */}
+      {overflow.length > 0 && (
+        <div className="flex items-start gap-2 rounded-md border border-yellow-500/50 bg-yellow-500/10 p-2 text-xs text-yellow-700 dark:text-yellow-400">
+          <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+          <span>
+            {overflow.length} sprite(s) could not fit in the atlas and were excluded.
+          </span>
+        </div>
+      )}
+
+      {/* Download button */}
+      <Button
+        onClick={handleDownload}
+        disabled={!hasSprites || loading}
+        className="w-full"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Exporting...
+          </>
+        ) : (
+          <>
+            <Download className="size-4" />
+            Download
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}

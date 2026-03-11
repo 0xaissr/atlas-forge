@@ -1,17 +1,19 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Grid3X3, Box, FileText, Download } from "lucide-react";
+import { Grid3X3, Box, FileText } from "lucide-react";
 import { GridSettings } from "@/components/grid-settings";
 import { RectangularSettings } from "@/components/rectangular-settings";
 import { DataFileSettings } from "@/components/datafile-settings";
-import type { SplitMode } from "@/types";
+import { ExportSettings } from "@/components/export-settings";
+import type { SplitMode, SpriteRect } from "@/types";
 
 interface SettingsPanelProps {
   splitMode: SplitMode;
   onSplitModeChange: (mode: SplitMode) => void;
   image: HTMLImageElement;
   fileName: string;
+  sprites: SpriteRect[];
 }
 
 const TAB_MAP: Record<string, SplitMode> = {
@@ -31,6 +33,7 @@ export function SettingsPanel({
   onSplitModeChange,
   image,
   fileName,
+  sprites,
 }: SettingsPanelProps) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -76,19 +79,7 @@ export function SettingsPanel({
 
       {/* Export Settings */}
       <div className="shrink-0 border-t border-border p-4">
-        <h3 className="mb-3 text-sm font-medium text-foreground">
-          Export Settings
-        </h3>
-        <div className="mb-3 rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-          匯出設定將在後續實作
-        </div>
-        <button
-          disabled
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-primary/20 px-4 py-2 text-sm font-medium text-primary/50 cursor-not-allowed transition-colors"
-        >
-          <Download className="size-4" />
-          Download
-        </button>
+        <ExportSettings image={image} fileName={fileName} sprites={sprites} />
       </div>
     </div>
   );

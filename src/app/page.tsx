@@ -86,6 +86,7 @@ function EditorLayout({
             onSplitModeChange={setSplitMode}
             image={image}
             fileName={fileName}
+            sprites={sprites}
           />
           <div className="shrink-0 border-t border-border">
             <SpriteList
