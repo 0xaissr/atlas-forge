@@ -14,10 +14,10 @@ describe("exportCocosPlist", () => {
     expect(plist).toContain("</plist>");
   });
 
-  test("should include all sprite frames", () => {
+  test("should include all sprite frames with .png extension", () => {
     const plist = exportCocosPlist(sprites, "coins.png", 128, 64);
-    expect(plist).toContain("<key>coin-0</key>");
-    expect(plist).toContain("<key>coin-1</key>");
+    expect(plist).toContain("<key>coin-0.png</key>");
+    expect(plist).toContain("<key>coin-1.png</key>");
   });
 
   test("should use format 3 field names", () => {
@@ -37,7 +37,7 @@ describe("exportCocosPlist", () => {
     expect(plist).toContain("<integer>3</integer>");
     expect(plist).toContain("<key>textureFileName</key>");
     expect(plist).toContain("<string>coins.png</string>");
-    expect(plist).toContain("<key>pixelFormat</key>");
+    expect(plist).toContain("<key>realTextureFileName</key>");
     expect(plist).toContain("{128,64}");
   });
 
