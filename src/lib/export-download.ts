@@ -3,6 +3,7 @@ import { saveAs } from "file-saver";
 import type { SpriteRect, ExportSettings } from "@/types";
 import { exportCocosPlist } from "./export-cocos";
 import { exportUnityMeta } from "./export-unity";
+import { repackAtlas } from "./repack-atlas";
 
 export interface DownloadOptions {
   sprites: SpriteRect[];
@@ -32,47 +33,20 @@ export async function downloadAtlas(
   try {
     if (settings.mode === "repack") {
       const imageBitmap = await createImageBitmap(image);
-      const worker = new Worker(
-        new URL("../workers/repack.worker.ts", import.meta.url)
-      );
-
-      const result = await new Promise<{
-        imageBlob?: Blob;
-        sprites?: SpriteRect[];
-        width?: number;
-        height?: number;
-        overflow?: string[];
-        error?: string;
-      }>((resolve, reject) => {
-        worker.onmessage = (e) => {
-          resolve(e.data);
-          worker.terminate();
-        };
-        worker.onerror = (e) => {
-          reject(new Error(e.message || "Worker error"));
-          worker.terminate();
-        };
-        worker.postMessage(
-          {
-            sprites,
-            imageData: imageBitmap,
-            maxSize: settings.maxSize,
-            padding: settings.padding,
-            trim: settings.trim,
-          },
-          [imageBitmap]
-        );
+      const result = await repackAtlas({
+        sprites,
+        sourceImage: imageBitmap,
+        maxSize: settings.maxSize,
+        padding: settings.padding,
+        trim: settings.trim,
       });
+      imageBitmap.close();
 
-      if (result.error) {
-        return { success: false, error: result.error };
-      }
-
-      atlasImage = result.imageBlob!;
-      atlasSprites = result.sprites!;
-      atlasWidth = result.width!;
-      atlasHeight = result.height!;
-      overflow = result.overflow ?? [];
+      atlasImage = result.imageBlob;
+      atlasSprites = result.sprites;
+      atlasWidth = result.width;
+      atlasHeight = result.height;
+      overflow = result.overflow;
     } else {
       // Original mode: use the original image as-is
       const canvas = document.createElement("canvas");

@@ -36,7 +36,7 @@ export type ExportMode = "original" | "repack";
 export interface ExportSettings {
   engine: ExportEngine;
   mode: ExportMode;
-  maxSize: 1024 | 2048 | 4096;
+  maxSize: number;
   padding: number;
   trim: boolean;
 }

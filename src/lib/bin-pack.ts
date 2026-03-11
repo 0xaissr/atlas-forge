@@ -188,6 +188,23 @@ function splitFreeRect(
   return result;
 }
 
+/**
+ * Find the smallest power-of-2 square size that fits all rects.
+ * Tries 64, 128, 256, 512, 1024, 2048, 4096.
+ * Returns the size, or 4096 if nothing fits.
+ */
+export function findBestFitSize(
+  rects: PackInput[],
+  padding: number
+): number {
+  const sizes = [64, 128, 256, 512, 1024, 2048, 4096];
+  for (const size of sizes) {
+    const result = maxRectsPack(rects, size, size, padding);
+    if (result.overflow.length === 0) return size;
+  }
+  return 4096;
+}
+
 /** Check if rect A is fully contained within rect B */
 function isContainedIn(a: FreeRect, b: FreeRect): boolean {
   return (

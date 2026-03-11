@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Download, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,24 +15,110 @@ import {
 } from "@/components/ui/select";
 import type { SpriteRect, ExportSettings as ExportSettingsType, ExportEngine, ExportMode } from "@/types";
 import { downloadAtlas } from "@/lib/export-download";
+import { maxRectsPack, findBestFitSize } from "@/lib/bin-pack";
+
+export interface RepackPreview {
+  image: HTMLImageElement;
+  sprites: SpriteRect[];
+  width: number;
+  height: number;
+}
 
 interface ExportSettingsProps {
   image: HTMLImageElement;
   fileName: string;
   sprites: SpriteRect[];
+  onPreviewChange?: (preview: RepackPreview | null) => void;
 }
 
-export function ExportSettings({ image, fileName, sprites }: ExportSettingsProps) {
+export function ExportSettings({ image, fileName, sprites, onPreviewChange }: ExportSettingsProps) {
   const [engine, setEngine] = useState<ExportEngine>("cocos");
-  const [mode, setMode] = useState<ExportMode>("original");
-  const [maxSize, setMaxSize] = useState<1024 | 2048 | 4096>(2048);
+  const [mode, setMode] = useState<ExportMode>("repack");
+  const [sizeOption, setSizeOption] = useState("bestfit");
   const [padding, setPadding] = useState(1);
   const [trim, setTrim] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [overflow, setOverflow] = useState<string[]>([]);
+  const [bestFitSize, setBestFitSize] = useState(1024);
+  const previewUrlRef = useRef<string | null>(null);
 
   const hasSprites = sprites.length > 0;
+
+  const resolvedMaxSize = sizeOption === "bestfit" ? bestFitSize : Number(sizeOption);
+
+  // Calculate BestFit size
+  useEffect(() => {
+    if (sprites.length === 0) {
+      setBestFitSize(64);
+      return;
+    }
+    const packInput = sprites.map((s) => ({ id: s.id, width: s.width, height: s.height }));
+    const size = findBestFitSize(packInput, padding);
+    setBestFitSize(size);
+  }, [sprites, padding]);
+
+  // Compute repack preview
+  useEffect(() => {
+    if (mode !== "repack" || sprites.length === 0) {
+      onPreviewChange?.(null);
+      return;
+    }
+
+    const size = sizeOption === "bestfit" ? bestFitSize : Number(sizeOption);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const imageBitmap = await createImageBitmap(image);
+
+        // Import repackAtlas dynamically to avoid circular deps
+        const { repackAtlas } = await import("@/lib/repack-atlas");
+        const result = await repackAtlas({
+          sprites,
+          sourceImage: imageBitmap,
+          maxSize: size,
+          padding,
+          trim,
+        });
+        imageBitmap.close();
+
+        if (cancelled) return;
+
+        // Revoke previous preview URL
+        if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+
+        const url = URL.createObjectURL(result.imageBlob);
+        previewUrlRef.current = url;
+
+        const img = new Image();
+        img.onload = () => {
+          if (cancelled) {
+            URL.revokeObjectURL(url);
+            return;
+          }
+          onPreviewChange?.({
+            image: img,
+            sprites: result.sprites,
+            width: result.width,
+            height: result.height,
+          });
+        };
+        img.src = url;
+      } catch {
+        // Ignore preview errors
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [mode, sprites, bestFitSize, sizeOption, padding, trim, image, onPreviewChange]);
+
+  // Clear preview when leaving repack mode
+  useEffect(() => {
+    if (mode !== "repack") {
+      onPreviewChange?.(null);
+    }
+  }, [mode, onPreviewChange]);
 
   const handleDownload = async () => {
     setLoading(true);
@@ -43,7 +129,7 @@ export function ExportSettings({ image, fileName, sprites }: ExportSettingsProps
       const settings: ExportSettingsType = {
         engine,
         mode,
-        maxSize,
+        maxSize: resolvedMaxSize,
         padding,
         trim,
       };
@@ -105,13 +191,16 @@ export function ExportSettings({ image, fileName, sprites }: ExportSettingsProps
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Max Size</Label>
             <Select
-              value={String(maxSize)}
-              onValueChange={(val) => setMaxSize(Number(val) as 1024 | 2048 | 4096)}
+              value={sizeOption}
+              onValueChange={(val) => { if (val) setSizeOption(val); }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="bestfit">BestFit ({bestFitSize})</SelectItem>
+                <SelectItem value="256">256</SelectItem>
+                <SelectItem value="512">512</SelectItem>
                 <SelectItem value="1024">1024</SelectItem>
                 <SelectItem value="2048">2048</SelectItem>
                 <SelectItem value="4096">4096</SelectItem>

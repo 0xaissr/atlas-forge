@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { CanvasPreview } from "@/components/canvas-preview";
 import { SettingsPanel } from "@/components/settings-panel";
 import { SpriteList } from "@/components/sprite-list";
-import { ExportSettings } from "@/components/export-settings";
+import { ExportSettings, type RepackPreview } from "@/components/export-settings";
 import { SpriteProvider, useSprites } from "@/store/sprite-context";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Scissors, Download, X, Plus } from "lucide-react";
@@ -32,7 +32,14 @@ function EditorContent({
   const [selectedSpriteId, setSelectedSpriteId] = useState<string | null>(null);
   const [pickingBgColor, setPickingBgColor] = useState(false);
   const [bgColor, setBgColor] = useState<[number, number, number] | null>(null);
+  const [activeMainTab, setActiveMainTab] = useState("split");
+  const [repackPreview, setRepackPreview] = useState<RepackPreview | null>(null);
   const { sprites, dispatch, undo, redo, canUndo, canRedo } = useSprites();
+
+  // Determine what to show in canvas
+  const showRepack = activeMainTab === "export" && repackPreview !== null;
+  const canvasImage = showRepack ? repackPreview.image : image;
+  const canvasSprites = showRepack ? repackPreview.sprites : sprites;
 
   // Keyboard shortcuts: Delete, Undo, Redo
   useEffect(() => {
@@ -78,11 +85,11 @@ function EditorContent({
           </div>
         )}
         <CanvasPreview
-          image={image}
-          sprites={sprites}
-          selectedSpriteId={selectedSpriteId}
+          image={canvasImage}
+          sprites={canvasSprites}
+          selectedSpriteId={showRepack ? null : selectedSpriteId}
           onSpriteSelect={(id) => {
-            if (pickingBgColor) return;
+            if (pickingBgColor || showRepack) return;
             setSelectedSpriteId(id);
           }}
           dispatch={dispatch}
@@ -103,7 +110,7 @@ function EditorContent({
 
       {/* Right Panel */}
       <div className="flex w-full flex-col border-t border-border bg-card/80 backdrop-blur-sm md:h-full md:w-80 md:border-l md:border-t-0">
-        <Tabs defaultValue="split" className="flex flex-1 flex-col overflow-hidden">
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="flex flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b border-border px-3 pt-2 pb-0">
             <TabsList className="w-full">
               <TabsTrigger value="split" className="flex items-center gap-1.5">
@@ -136,7 +143,7 @@ function EditorContent({
           </TabsContent>
 
           <TabsContent value="export" className="mt-0 flex-1 overflow-y-auto p-4">
-            <ExportSettings image={image} fileName={fileName} sprites={sprites} />
+            <ExportSettings image={image} fileName={fileName} sprites={sprites} onPreviewChange={setRepackPreview} />
           </TabsContent>
         </Tabs>
       </div>
