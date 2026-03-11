@@ -8,20 +8,23 @@ export function exportCocosPlist(
 ): string {
   const framesEntries = sprites
     .map((sprite) => {
-      const frame = `{{${sprite.x},${sprite.y}},{${sprite.width},${sprite.height}}}`;
-      const sourceSize = `{${sprite.width},${sprite.height}}`;
+      const textureRect = `{{${sprite.x},${sprite.y}},{${sprite.width},${sprite.height}}}`;
+      const spriteSize = `{${sprite.width},${sprite.height}}`;
+      const spriteSourceSize = `{${sprite.width},${sprite.height}}`;
       return `            <key>${sprite.name}</key>
             <dict>
-                <key>frame</key>
-                <string>${frame}</string>
-                <key>offset</key>
+                <key>aliases</key>
+                <array/>
+                <key>spriteOffset</key>
                 <string>{0,0}</string>
-                <key>rotated</key>
+                <key>spriteSize</key>
+                <string>${spriteSize}</string>
+                <key>spriteSourceSize</key>
+                <string>${spriteSourceSize}</string>
+                <key>textureRect</key>
+                <string>${textureRect}</string>
+                <key>textureRotated</key>
                 <false/>
-                <key>sourceColorRect</key>
-                <string>{{0,0},{${sprite.width},${sprite.height}}}</string>
-                <key>sourceSize</key>
-                <string>${sourceSize}</string>
             </dict>`;
     })
     .join("\n");
@@ -37,7 +40,13 @@ ${framesEntries}
         <key>metadata</key>
         <dict>
             <key>format</key>
-            <integer>2</integer>
+            <integer>3</integer>
+            <key>pixelFormat</key>
+            <string>RGBA8888</string>
+            <key>premultiplyAlpha</key>
+            <false/>
+            <key>realTextureFileName</key>
+            <string>${textureFileName}</string>
             <key>size</key>
             <string>{${imageWidth},${imageHeight}}</string>
             <key>textureFileName</key>

@@ -20,18 +20,24 @@ describe("exportCocosPlist", () => {
     expect(plist).toContain("<key>coin-1</key>");
   });
 
-  test("should format frame coordinates correctly", () => {
+  test("should use format 3 field names", () => {
     const plist = exportCocosPlist(sprites, "coins.png", 128, 64);
+    expect(plist).toContain("<key>textureRect</key>");
+    expect(plist).toContain("<key>spriteOffset</key>");
+    expect(plist).toContain("<key>spriteSize</key>");
+    expect(plist).toContain("<key>spriteSourceSize</key>");
+    expect(plist).toContain("<key>textureRotated</key>");
     expect(plist).toContain("{{0,0},{64,64}}");
     expect(plist).toContain("{{64,0},{64,64}}");
   });
 
-  test("should include metadata", () => {
+  test("should include format 3 metadata", () => {
     const plist = exportCocosPlist(sprites, "coins.png", 128, 64);
     expect(plist).toContain("<key>format</key>");
-    expect(plist).toContain("<integer>2</integer>");
+    expect(plist).toContain("<integer>3</integer>");
     expect(plist).toContain("<key>textureFileName</key>");
     expect(plist).toContain("<string>coins.png</string>");
+    expect(plist).toContain("<key>pixelFormat</key>");
     expect(plist).toContain("{128,64}");
   });
 

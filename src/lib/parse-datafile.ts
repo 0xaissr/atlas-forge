@@ -1,4 +1,4 @@
-import type { SpriteRect } from "@/types";
+import type { SpriteRect } from "../types";
 
 /**
  * Strip common image extensions from a sprite name.
@@ -124,7 +124,10 @@ function parsePlist(content: string): SpriteRect[] {
       const spriteName = child.textContent || "";
       const spriteDict = children[i + 1];
       if (spriteDict && spriteDict.tagName === "dict") {
-        const frameEl = findValueForKey(spriteDict, "frame");
+        // Support format 3 (textureRect) and format 2 (frame)
+        const frameEl =
+          findValueForKey(spriteDict, "textureRect") ||
+          findValueForKey(spriteDict, "frame");
         if (frameEl && frameEl.textContent) {
           const frame = parseFrameString(frameEl.textContent);
           sprites.push({

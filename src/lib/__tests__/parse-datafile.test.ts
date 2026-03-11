@@ -182,6 +182,78 @@ describe("parseDataFile", () => {
     });
   });
 
+  describe("Cocos Creator plist format 3 (XML)", () => {
+    const FORMAT3_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>frames</key>
+  <dict>
+    <key>coin-0</key>
+    <dict>
+      <key>aliases</key>
+      <array/>
+      <key>spriteOffset</key>
+      <string>{0,0}</string>
+      <key>spriteSize</key>
+      <string>{64,64}</string>
+      <key>spriteSourceSize</key>
+      <string>{64,64}</string>
+      <key>textureRect</key>
+      <string>{{0,0},{64,64}}</string>
+      <key>textureRotated</key>
+      <false/>
+    </dict>
+    <key>coin-1</key>
+    <dict>
+      <key>aliases</key>
+      <array/>
+      <key>spriteOffset</key>
+      <string>{0,0}</string>
+      <key>spriteSize</key>
+      <string>{48,48}</string>
+      <key>spriteSourceSize</key>
+      <string>{48,48}</string>
+      <key>textureRect</key>
+      <string>{{80,10},{48,48}}</string>
+      <key>textureRotated</key>
+      <false/>
+    </dict>
+  </dict>
+  <key>metadata</key>
+  <dict>
+    <key>format</key>
+    <integer>3</integer>
+    <key>textureFileName</key>
+    <string>coins.png</string>
+  </dict>
+</dict>
+</plist>`;
+
+    test("should parse correct number of sprites", () => {
+      const result = parseDataFile(FORMAT3_PLIST, "coins.plist");
+      expect(result).toHaveLength(2);
+    });
+
+    test("should parse sprite positions and sizes from textureRect", () => {
+      const result = parseDataFile(FORMAT3_PLIST, "coins.plist");
+      expect(result[0]).toMatchObject({
+        name: "coin-0",
+        x: 0,
+        y: 0,
+        width: 64,
+        height: 64,
+      });
+      expect(result[1]).toMatchObject({
+        name: "coin-1",
+        x: 80,
+        y: 10,
+        width: 48,
+        height: 48,
+      });
+    });
+  });
+
   describe("auto-detection", () => {
     test("should detect JSON format from content starting with {", () => {
       const result = parseDataFile(TP_JSON_HASH, "data.txt");
