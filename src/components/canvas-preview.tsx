@@ -1,14 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import type { SpriteRect } from "@/types";
+import type { SpriteAction, SpriteRect } from "@/types";
 import { useCanvasTransform } from "@/hooks/use-canvas-transform";
+import { useSpriteInteraction } from "@/hooks/use-sprite-interaction";
 
 interface CanvasPreviewProps {
   image: HTMLImageElement;
   sprites: SpriteRect[];
   selectedSpriteId: string | null;
-  onSpriteSelect?: (id: string | null) => void;
+  onSpriteSelect: (id: string | null) => void;
+  dispatch: (action: SpriteAction) => void;
 }
 
 // Canvas drawing colors — switch based on dark mode
@@ -20,8 +22,10 @@ const COLORS = {
     spriteGlow: "rgba(0, 172, 193, 0.3)",
     selectedBorder: "#9c27b0",
     selectedGlow: "rgba(156, 39, 176, 0.5)",
-    statusBg: "rgba(255, 255, 255, 0.9)",
-    statusText: "#333333",
+    handleFill: "#ffffff",
+    handleBorder: "#9c27b0",
+    dragBorder: "#ff9800",
+    dragGlow: "rgba(255, 152, 0, 0.5)",
   },
   dark: {
     checkerA: "#1a1a2e",
@@ -30,18 +34,22 @@ const COLORS = {
     spriteGlow: "rgba(0, 229, 255, 0.4)",
     selectedBorder: "#d050ff",
     selectedGlow: "rgba(208, 80, 255, 0.6)",
-    statusBg: "rgba(20, 20, 40, 0.9)",
-    statusText: "#e0e0e0",
+    handleFill: "#1a1a2e",
+    handleBorder: "#d050ff",
+    dragBorder: "#ffab40",
+    dragGlow: "rgba(255, 171, 64, 0.6)",
   },
 };
 
 const CHECKER_SIZE = 8;
+const HANDLE_SIZE = 6; // px in screen space
 
 export function CanvasPreview({
   image,
   sprites,
   selectedSpriteId,
   onSpriteSelect,
+  dispatch,
 }: CanvasPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,15 +60,34 @@ export function CanvasPreview({
     scale,
     offsetX,
     offsetY,
+    isPanning,
+    isSpaceHeld,
     fitToContainer,
     resetToActual,
     onWheel,
-    onMouseDown,
-    onMouseMove,
-    onMouseUp,
+    onMouseDown: onPanMouseDown,
+    onMouseMove: onPanMouseMove,
+    onMouseUp: onPanMouseUp,
     onKeyDown,
     onKeyUp,
   } = useCanvasTransform();
+
+  const {
+    onMouseDown: onInteractionMouseDown,
+    onMouseMove: onInteractionMouseMove,
+    onMouseUp: onInteractionMouseUp,
+    cursor,
+    dragPreview,
+  } = useSpriteInteraction({
+    sprites,
+    scale,
+    offsetX,
+    offsetY,
+    dispatch,
+    selectedSpriteId,
+    setSelectedSpriteId: onSpriteSelect,
+    isPanning: isPanning || isSpaceHeld,
+  });
 
   const isDarkMode = useCallback(() => {
     return document.documentElement.classList.contains("dark");
@@ -112,7 +139,6 @@ export function CanvasPreview({
 
     for (const sprite of sprites) {
       const isSelected = sprite.id === selectedSpriteId;
-
       if (isSelected) continue; // Draw selected sprite last
 
       ctx.strokeStyle = colors.spriteBorder;
@@ -126,21 +152,47 @@ export function CanvasPreview({
     // 4. Draw selected sprite on top
     const selectedSprite = sprites.find((s) => s.id === selectedSpriteId);
     if (selectedSprite) {
-      ctx.strokeStyle = colors.selectedBorder;
+      // If dragging, show the drag preview instead
+      const rect = dragPreview || selectedSprite;
+      const borderColor = dragPreview ? colors.dragBorder : colors.selectedBorder;
+      const glowColor = dragPreview ? colors.dragGlow : colors.selectedGlow;
+
+      ctx.strokeStyle = borderColor;
       ctx.lineWidth = 2 / scale;
-      ctx.shadowColor = colors.selectedGlow;
+      ctx.shadowColor = glowColor;
       ctx.shadowBlur = 8 / scale;
-      ctx.strokeRect(
-        selectedSprite.x,
-        selectedSprite.y,
-        selectedSprite.width,
-        selectedSprite.height
-      );
+      ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
       ctx.shadowBlur = 0;
+
+      // 5. Draw 8 control handles on the selected sprite
+      const handleSizeImg = HANDLE_SIZE / scale;
+      const half = handleSizeImg / 2;
+      const { x, y, width: sw, height: sh } = rect;
+      const cx = x + sw / 2;
+      const cy = y + sh / 2;
+
+      const handles = [
+        { hx: x, hy: y },           // nw
+        { hx: cx, hy: y },          // n
+        { hx: x + sw, hy: y },      // ne
+        { hx: x, hy: cy },          // w
+        { hx: x + sw, hy: cy },     // e
+        { hx: x, hy: y + sh },      // sw
+        { hx: cx, hy: y + sh },     // s
+        { hx: x + sw, hy: y + sh }, // se
+      ];
+
+      for (const h of handles) {
+        ctx.fillStyle = colors.handleFill;
+        ctx.strokeStyle = colors.handleBorder;
+        ctx.lineWidth = 1.5 / scale;
+        ctx.fillRect(h.hx - half, h.hy - half, handleSizeImg, handleSizeImg);
+        ctx.strokeRect(h.hx - half, h.hy - half, handleSizeImg, handleSizeImg);
+      }
     }
 
     ctx.restore();
-  }, [image, sprites, selectedSpriteId, scale, offsetX, offsetY, isDarkMode]);
+  }, [image, sprites, selectedSpriteId, scale, offsetX, offsetY, isDarkMode, dragPreview]);
 
   // Animation loop
   useEffect(() => {
@@ -181,7 +233,6 @@ export function CanvasPreview({
     const container = containerRef.current;
     if (!container || !image) return;
 
-    // Small delay to let ResizeObserver fire first
     const timer = setTimeout(() => {
       const { width, height } = containerSizeRef.current;
       if (width > 0 && height > 0) {
@@ -202,37 +253,29 @@ export function CanvasPreview({
     };
   }, [onKeyDown, onKeyUp]);
 
-  // Click to select sprite
-  const handleClick = useCallback(
+  // Merged mouse handlers
+  const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (!onSpriteSelect) return;
-
-      const rect = e.currentTarget.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      // Convert screen coords to image coords
-      const imgX = (mouseX - offsetX) / scale;
-      const imgY = (mouseY - offsetY) / scale;
-
-      // Find sprite under cursor (reverse order for z-index priority)
-      let found: string | null = null;
-      for (let i = sprites.length - 1; i >= 0; i--) {
-        const s = sprites[i];
-        if (
-          imgX >= s.x &&
-          imgX <= s.x + s.width &&
-          imgY >= s.y &&
-          imgY <= s.y + s.height
-        ) {
-          found = s.id;
-          break;
-        }
-      }
-
-      onSpriteSelect(found);
+      onPanMouseDown(e);
+      onInteractionMouseDown(e);
     },
-    [onSpriteSelect, sprites, scale, offsetX, offsetY]
+    [onPanMouseDown, onInteractionMouseDown]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      onPanMouseMove(e);
+      onInteractionMouseMove(e);
+    },
+    [onPanMouseMove, onInteractionMouseMove]
+  );
+
+  const handleMouseUp = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      onPanMouseUp(e);
+      onInteractionMouseUp();
+    },
+    [onPanMouseUp, onInteractionMouseUp]
   );
 
   const handleFit = useCallback(() => {
@@ -255,13 +298,13 @@ export function CanvasPreview({
     <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-[var(--canvas-bg)]">
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 cursor-crosshair"
+        className="absolute inset-0"
+        style={{ cursor }}
         onWheel={onWheel}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
         onContextMenu={(e) => e.preventDefault()}
       />
 

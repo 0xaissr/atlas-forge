@@ -33,7 +33,7 @@ export function SettingsPanel({
   fileName,
 }: SettingsPanelProps) {
   return (
-    <div className="flex h-full w-80 flex-col border-l border-border bg-card/80 backdrop-blur-sm">
+    <div className="flex flex-1 flex-col overflow-hidden">
       <Tabs
         value={MODE_TO_TAB[splitMode]}
         onValueChange={(val) => {
