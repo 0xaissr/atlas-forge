@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Grid3X3, Box, FileText, Download } from "lucide-react";
 import { GridSettings } from "@/components/grid-settings";
 import { RectangularSettings } from "@/components/rectangular-settings";
+import { DataFileSettings } from "@/components/datafile-settings";
 import type { SplitMode } from "@/types";
 
 interface SettingsPanelProps {
@@ -68,17 +69,7 @@ export function SettingsPanel({
           </TabsContent>
 
           <TabsContent value="2">
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground">
-                Data File Import
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                匯入現有的 atlas 資料檔（plist / JSON），直接載入切割定義。
-              </p>
-              <div className="rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
-                設定項目將在後續實作
-              </div>
-            </div>
+            <DataFileSettings fileName={fileName} />
           </TabsContent>
         </div>
       </Tabs>
