@@ -2,11 +2,14 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Grid3X3, Box, FileText, Download } from "lucide-react";
+import { GridSettings } from "@/components/grid-settings";
 import type { SplitMode } from "@/types";
 
 interface SettingsPanelProps {
   splitMode: SplitMode;
   onSplitModeChange: (mode: SplitMode) => void;
+  image: HTMLImageElement;
+  fileName: string;
 }
 
 const TAB_MAP: Record<string, SplitMode> = {
@@ -24,6 +27,8 @@ const MODE_TO_TAB: Record<SplitMode, string> = {
 export function SettingsPanel({
   splitMode,
   onSplitModeChange,
+  image,
+  fileName,
 }: SettingsPanelProps) {
   return (
     <div className="flex h-full w-80 flex-col border-l border-border bg-card/80 backdrop-blur-sm">
@@ -54,17 +59,7 @@ export function SettingsPanel({
 
         <div className="flex-1 overflow-y-auto p-4">
           <TabsContent value="0">
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-foreground">
-                Grid Split
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                以固定格線切割 spritesheet，適用於等寬等高的圖塊。
-              </p>
-              <div className="rounded-md border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
-                設定項目將在後續實作
-              </div>
-            </div>
+            <GridSettings image={image} fileName={fileName} />
           </TabsContent>
 
           <TabsContent value="1">

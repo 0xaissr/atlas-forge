@@ -45,6 +45,8 @@ function EditorLayout({
         <SettingsPanel
           splitMode={splitMode}
           onSplitModeChange={setSplitMode}
+          image={image}
+          fileName={fileName}
         />
       </div>
     </div>
