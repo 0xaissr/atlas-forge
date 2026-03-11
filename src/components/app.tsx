@@ -8,7 +8,7 @@ import { SettingsPanel } from "@/components/settings-panel";
 import { SpriteList } from "@/components/sprite-list";
 import { ExportSettings, type RepackPreview } from "@/components/export-settings";
 import { SpriteProvider, useSprites } from "@/store/sprite-context";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scissors, Download, X, Plus } from "lucide-react";
 import type { SplitMode, SpriteRect } from "@/types";
 
@@ -34,12 +34,15 @@ function EditorContent({
   const [bgColor, setBgColor] = useState<[number, number, number] | null>(null);
   const [activeMainTab, setActiveMainTab] = useState("split");
   const [repackPreview, setRepackPreview] = useState<RepackPreview | null>(null);
+  const [showRepackBorders, setShowRepackBorders] = useState(false);
   const { sprites, dispatch, undo, redo, canUndo, canRedo } = useSprites();
 
   // Determine what to show in canvas
   const showRepack = activeMainTab === "export" && repackPreview !== null;
   const canvasImage = showRepack ? repackPreview.image : image;
-  const canvasSprites = showRepack ? repackPreview.sprites : sprites;
+  const canvasSprites = showRepack
+    ? (showRepackBorders ? repackPreview.sprites : [])
+    : sprites;
 
   // Keyboard shortcuts: Delete, Undo, Redo
   useEffect(() => {
@@ -124,7 +127,8 @@ function EditorContent({
             </TabsList>
           </div>
 
-          <TabsContent value="split" className="mt-0 flex flex-1 flex-col overflow-hidden">
+          {/* Use CSS visibility instead of unmounting to preserve state */}
+          <div className={`mt-0 flex flex-1 flex-col overflow-hidden ${activeMainTab !== "split" ? "hidden" : ""}`}>
             <SettingsPanel
               splitMode={splitMode}
               onSplitModeChange={setSplitMode}
@@ -140,11 +144,17 @@ function EditorContent({
                 setSelectedSpriteId={setSelectedSpriteId}
               />
             </div>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="export" className="mt-0 flex-1 overflow-y-auto p-4">
-            <ExportSettings image={image} fileName={fileName} sprites={sprites} onPreviewChange={setRepackPreview} />
-          </TabsContent>
+          <div className={`mt-0 flex-1 overflow-y-auto p-4 ${activeMainTab !== "export" ? "hidden" : ""}`}>
+            <ExportSettings
+              image={image}
+              fileName={fileName}
+              sprites={sprites}
+              onPreviewChange={setRepackPreview}
+              onShowBordersChange={setShowRepackBorders}
+            />
+          </div>
         </Tabs>
       </div>
     </>

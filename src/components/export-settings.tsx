@@ -29,14 +29,16 @@ interface ExportSettingsProps {
   fileName: string;
   sprites: SpriteRect[];
   onPreviewChange?: (preview: RepackPreview | null) => void;
+  onShowBordersChange?: (show: boolean) => void;
 }
 
-export function ExportSettings({ image, fileName, sprites, onPreviewChange }: ExportSettingsProps) {
+export function ExportSettings({ image, fileName, sprites, onPreviewChange, onShowBordersChange }: ExportSettingsProps) {
   const [engine, setEngine] = useState<ExportEngine>("cocos");
   const [mode, setMode] = useState<ExportMode>("repack");
   const [sizeOption, setSizeOption] = useState("bestfit");
   const [padding, setPadding] = useState(1);
   const [trim, setTrim] = useState(false);
+  const [showBorders, setShowBorders] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [overflow, setOverflow] = useState<string[]>([]);
@@ -231,6 +233,21 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange }: Ex
             />
             <Label htmlFor="trim-checkbox" className="text-xs text-muted-foreground cursor-pointer">
               Trim transparent pixels
+            </Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={showBorders}
+              onCheckedChange={(checked) => {
+                const val = checked === true;
+                setShowBorders(val);
+                onShowBordersChange?.(val);
+              }}
+              id="show-borders-checkbox"
+            />
+            <Label htmlFor="show-borders-checkbox" className="text-xs text-muted-foreground cursor-pointer">
+              Show sprite borders
             </Label>
           </div>
         </div>
