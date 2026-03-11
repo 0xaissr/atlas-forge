@@ -94,7 +94,8 @@ export async function downloadAtlas(
       atlasHeight = image.naturalHeight;
     }
 
-    const pngFileName = `${fileName}.png`;
+    const baseName = fileName.replace(/\.[^.]+$/, "");
+    const pngFileName = `${baseName}.png`;
     zip.file(pngFileName, atlasImage);
 
     if (settings.engine === "cocos") {
@@ -104,7 +105,7 @@ export async function downloadAtlas(
         atlasWidth,
         atlasHeight
       );
-      zip.file(`${fileName}.plist`, plist);
+      zip.file(`${baseName}.plist`, plist);
     } else {
       const meta = exportUnityMeta(
         atlasSprites,
@@ -116,7 +117,7 @@ export async function downloadAtlas(
     }
 
     const blob = await zip.generateAsync({ type: "blob" });
-    saveAs(blob, `${fileName}_${settings.engine}.zip`);
+    saveAs(blob, `${baseName}_${settings.engine}.zip`);
 
     return { success: true, overflow };
   } catch (error) {
