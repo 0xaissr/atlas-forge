@@ -4,12 +4,13 @@ import { useCallback, useRef, useState } from "react";
 
 interface ImageUploaderProps {
   onImageLoaded: (image: HTMLImageElement, fileName: string) => void;
+  compact?: boolean;
 }
 
 const ACCEPTED_FORMATS = ".png,.jpg,.jpeg,.webp";
 const ACCEPTED_MIME = ["image/png", "image/jpeg", "image/webp"];
 
-export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
+export function ImageUploader({ onImageLoaded, compact }: ImageUploaderProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,8 +41,8 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragOver(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      const files = Array.from(e.dataTransfer.files);
+      files.forEach(handleFile);
     },
     [handleFile]
   );
@@ -59,8 +60,10 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
   const handleClick = () => inputRef.current?.click();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.target.files || []);
+    files.forEach(handleFile);
+    // Reset input so same file can be re-selected
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
@@ -71,8 +74,9 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
       onDragLeave={handleDragLeave}
       className={`
         flex cursor-pointer flex-col items-center justify-center
-        rounded-lg border-2 border-dashed p-12
+        rounded-lg border-2 border-dashed
         transition-all duration-200
+        ${compact ? "p-6" : "p-12"}
         ${
           isDragOver
             ? "border-primary bg-primary/5 shadow-[var(--glow-primary)]"
@@ -82,7 +86,7 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
     >
       {/* Upload icon */}
       <svg
-        className="mb-4 h-12 w-12 text-muted-foreground"
+        className={`text-muted-foreground ${compact ? "mb-2 h-8 w-8" : "mb-4 h-12 w-12"}`}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -96,11 +100,11 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
         />
       </svg>
 
-      <p className="mb-1 text-lg font-medium text-foreground">
+      <p className={`mb-1 font-medium text-foreground ${compact ? "text-sm" : "text-lg"}`}>
         拖放圖片到這裡，或點擊選擇檔案
       </p>
-      <p className="text-sm text-muted-foreground">
-        支援格式：PNG、JPG、JPEG、WebP
+      <p className={`text-muted-foreground ${compact ? "text-xs" : "text-sm"}`}>
+        支援格式：PNG、JPG、JPEG、WebP（可多選）
       </p>
 
       {error && (
@@ -111,6 +115,7 @@ export function ImageUploader({ onImageLoaded }: ImageUploaderProps) {
         ref={inputRef}
         type="file"
         accept={ACCEPTED_FORMATS}
+        multiple
         onChange={handleChange}
         className="hidden"
       />

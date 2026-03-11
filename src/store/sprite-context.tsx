@@ -41,9 +41,26 @@ interface SpriteContextValue {
 
 const SpriteContext = createContext<SpriteContextValue | null>(null);
 
-export function SpriteProvider({ children }: { children: React.ReactNode }) {
+interface SpriteProviderProps {
+  children: React.ReactNode;
+  initialSprites?: SpriteRect[];
+  onSpritesChange?: (sprites: SpriteRect[]) => void;
+}
+
+export function SpriteProvider({
+  children,
+  initialSprites = [],
+  onSpritesChange,
+}: SpriteProviderProps) {
   const { state: sprites, setState, undo, redo, canUndo, canRedo } =
-    useUndo<SpriteRect[]>([]);
+    useUndo<SpriteRect[]>(initialSprites);
+
+  const onSpritesChangeRef = React.useRef(onSpritesChange);
+  onSpritesChangeRef.current = onSpritesChange;
+
+  React.useEffect(() => {
+    onSpritesChangeRef.current?.(sprites);
+  }, [sprites]);
 
   const dispatch = useCallback(
     (action: SpriteAction) => {
