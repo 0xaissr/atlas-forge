@@ -11,7 +11,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import type { SpriteRect, ExportSettings as ExportSettingsType, ExportEngine, ExportMode } from "@/types";
 import { downloadAtlas } from "@/lib/export-download";
@@ -46,6 +45,9 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
   const previewUrlRef = useRef<string | null>(null);
 
   const hasSprites = sprites.length > 0;
+
+  const ENGINE_LABELS: Record<string, string> = { cocos: "Cocos Creator", unity: "Unity" };
+  const MODE_LABELS: Record<string, string> = { original: "Original", repack: "Repack" };
 
   const resolvedMaxSize = sizeOption === "bestfit" ? bestFitSize : Number(sizeOption);
 
@@ -164,7 +166,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
         <Label className="text-xs text-muted-foreground">Engine</Label>
         <Select value={engine} onValueChange={(val) => setEngine(val as ExportEngine)}>
           <SelectTrigger className="w-full">
-            <SelectValue />
+            {ENGINE_LABELS[engine]}
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="cocos">Cocos Creator</SelectItem>
@@ -178,7 +180,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
         <Label className="text-xs text-muted-foreground">Mode</Label>
         <Select value={mode} onValueChange={(val) => setMode(val as ExportMode)}>
           <SelectTrigger className="w-full">
-            <SelectValue />
+            {MODE_LABELS[mode]}
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="original">Original</SelectItem>
@@ -197,7 +199,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
               onValueChange={(val) => { if (val) setSizeOption(val); }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                {sizeOption === "bestfit" ? `BestFit (${bestFitSize})` : sizeOption}
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="bestfit">BestFit ({bestFitSize})</SelectItem>
