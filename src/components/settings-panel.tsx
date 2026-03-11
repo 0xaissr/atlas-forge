@@ -5,7 +5,6 @@ import { Grid3X3, Box, FileText } from "lucide-react";
 import { GridSettings } from "@/components/grid-settings";
 import { RectangularSettings } from "@/components/rectangular-settings";
 import { DataFileSettings } from "@/components/datafile-settings";
-import { ExportSettings } from "@/components/export-settings";
 import type { SplitMode, SpriteRect } from "@/types";
 
 interface SettingsPanelProps {
@@ -35,7 +34,6 @@ export function SettingsPanel({
   onSplitModeChange,
   image,
   fileName,
-  sprites,
   onPickBgColor,
   bgColor,
 }: SettingsPanelProps) {
@@ -49,7 +47,7 @@ export function SettingsPanel({
         }}
         className="flex flex-1 flex-col overflow-hidden"
       >
-        <div className="shrink-0 border-b border-border px-3 pt-3 pb-0">
+        <div className="shrink-0 px-3 pt-3 pb-0">
           <TabsList className="w-full">
             <TabsTrigger value="0" className="flex items-center gap-1.5">
               <Grid3X3 className="size-3.5" />
@@ -80,11 +78,6 @@ export function SettingsPanel({
           </TabsContent>
         </div>
       </Tabs>
-
-      {/* Export Settings */}
-      <div className="shrink-0 border-t border-border p-4">
-        <ExportSettings image={image} fileName={fileName} sprites={sprites} />
-      </div>
     </div>
   );
 }

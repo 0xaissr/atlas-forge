@@ -6,8 +6,10 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { CanvasPreview } from "@/components/canvas-preview";
 import { SettingsPanel } from "@/components/settings-panel";
 import { SpriteList } from "@/components/sprite-list";
+import { ExportSettings } from "@/components/export-settings";
 import { SpriteProvider, useSprites } from "@/store/sprite-context";
-import { RotateCcw } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { RotateCcw, Scissors, Download } from "lucide-react";
 import type { SplitMode } from "@/types";
 
 function EditorLayout({
@@ -117,23 +119,44 @@ function EditorLayout({
           />
         </div>
 
-        {/* Settings Panel + Sprite List */}
+        {/* Right Panel: two main tabs */}
         <div className="flex w-full flex-col border-t border-border bg-card/80 backdrop-blur-sm md:h-full md:w-80 md:border-l md:border-t-0">
-          <SettingsPanel
-            splitMode={splitMode}
-            onSplitModeChange={setSplitMode}
-            image={image}
-            fileName={fileName}
-            sprites={sprites}
-            onPickBgColor={() => setPickingBgColor(true)}
-            bgColor={bgColor}
-          />
-          <div className="shrink-0 border-t border-border">
-            <SpriteList
-              selectedSpriteId={selectedSpriteId}
-              setSelectedSpriteId={setSelectedSpriteId}
-            />
-          </div>
+          <Tabs defaultValue="split" className="flex flex-1 flex-col overflow-hidden">
+            <div className="shrink-0 border-b border-border px-3 pt-2 pb-0">
+              <TabsList className="w-full">
+                <TabsTrigger value="split" className="flex items-center gap-1.5">
+                  <Scissors className="size-3.5" />
+                  Split
+                </TabsTrigger>
+                <TabsTrigger value="export" className="flex items-center gap-1.5">
+                  <Download className="size-3.5" />
+                  Export
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="split" className="mt-0 flex flex-1 flex-col overflow-hidden">
+              <SettingsPanel
+                splitMode={splitMode}
+                onSplitModeChange={setSplitMode}
+                image={image}
+                fileName={fileName}
+                sprites={sprites}
+                onPickBgColor={() => setPickingBgColor(true)}
+                bgColor={bgColor}
+              />
+              <div className="shrink-0 border-t border-border">
+                <SpriteList
+                  selectedSpriteId={selectedSpriteId}
+                  setSelectedSpriteId={setSelectedSpriteId}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="export" className="mt-0 flex-1 overflow-y-auto p-4">
+              <ExportSettings image={image} fileName={fileName} sprites={sprites} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
