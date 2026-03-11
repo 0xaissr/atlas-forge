@@ -58,12 +58,19 @@ export function RectangularSettings({
     );
     workerRef.current = worker;
 
-    worker.onmessage = (event: MessageEvent<SpriteRect[]>) => {
-      dispatch({ type: "SET_SPRITES", sprites: event.data });
+    worker.onmessage = (event: MessageEvent<SpriteRect[] | { error: string }>) => {
+      const data = event.data;
+      if (data && "error" in data) {
+        console.error("Detection worker error:", data.error);
+        setDetecting(false);
+        return;
+      }
+      dispatch({ type: "SET_SPRITES", sprites: data as SpriteRect[] });
       setDetecting(false);
     };
 
-    worker.onerror = () => {
+    worker.onerror = (e) => {
+      console.error("Detection worker failed:", e);
       setDetecting(false);
     };
 

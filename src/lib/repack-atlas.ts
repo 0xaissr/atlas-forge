@@ -1,4 +1,4 @@
-import type { SpriteRect } from "@/types";
+import type { SpriteRect } from "../types";
 import { maxRectsPack } from "./bin-pack";
 
 export interface RepackOptions {

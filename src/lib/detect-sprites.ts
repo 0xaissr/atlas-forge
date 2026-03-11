@@ -1,4 +1,4 @@
-import type { SpriteRect } from "@/types";
+import type { SpriteRect } from "../types";
 
 /**
  * Connected Component Labeling using Union-Find to detect sprites

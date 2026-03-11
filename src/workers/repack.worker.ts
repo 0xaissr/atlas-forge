@@ -1,5 +1,5 @@
-import { repackAtlas } from "@/lib/repack-atlas";
-import type { SpriteRect } from "@/types";
+import { repackAtlas } from "../lib/repack-atlas";
+import type { SpriteRect } from "../types";
 
 export interface RepackWorkerMessage {
   sprites: SpriteRect[];
