@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronDown } from "lucide-react";
 import { useSprites } from "@/store/sprite-context";
 
 interface SpriteListProps {
@@ -14,6 +14,7 @@ export function SpriteList({
   setSelectedSpriteId,
 }: SpriteListProps) {
   const { sprites, dispatch } = useSprites();
+  const [collapsed, setCollapsed] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,22 +69,21 @@ export function SpriteList({
     [dispatch, selectedSpriteId, setSelectedSpriteId]
   );
 
-  if (sprites.length === 0) {
-    return (
-      <div className="p-3 text-center text-xs text-muted-foreground">
-        尚無 Sprite 資料
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-        <span className="text-xs font-medium text-muted-foreground">
-          Sprites ({sprites.length})
-        </span>
-      </div>
-      <div className="overflow-y-auto max-h-60">
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        className="flex items-center justify-between px-3 py-2 text-xs font-medium text-primary hover:bg-accent/50 transition-colors"
+      >
+        <span>Sprites ({sprites.length})</span>
+        <ChevronDown className={`size-3.5 transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+      </button>
+      {!collapsed && sprites.length === 0 && (
+        <div className="p-3 text-center text-xs text-muted-foreground">
+          尚無 Sprite 資料
+        </div>
+      )}
+      <div className={`overflow-y-auto max-h-60 ${collapsed ? "hidden" : ""}`}>
         {sprites.map((sprite) => {
           const isSelected = sprite.id === selectedSpriteId;
           const isEditing = sprite.id === editingId;

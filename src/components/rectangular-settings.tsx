@@ -104,14 +104,14 @@ export function RectangularSettings({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-foreground">Rectangular Split</h3>
+      <h3 className="text-sm font-medium text-primary">Rectangular Split</h3>
       <p className="text-xs text-muted-foreground">
         自動偵測邊界，找出每個 sprite 的外框。支援取樣背景色來處理非透明背景。
       </p>
 
       {/* Background Color Picker */}
       <div className="space-y-2">
-        <Label className="text-xs">Background Color</Label>
+        <Label className="text-xs text-primary">Background Color</Label>
         <div className="flex items-center gap-2">
           <button
             onClick={onPickBgColor}
@@ -140,7 +140,7 @@ export function RectangularSettings({
       {bgColor && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-xs">Color Tolerance</Label>
+            <Label className="text-xs text-primary">Color Tolerance</Label>
             <Input
               type="number"
               min={0}
@@ -163,7 +163,7 @@ export function RectangularSettings({
       {/* Padding */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="rect-padding" className="text-xs">
+          <Label htmlFor="rect-padding" className="text-xs text-primary">
             Padding
           </Label>
           <Input
@@ -188,7 +188,7 @@ export function RectangularSettings({
       {/* Alpha Threshold */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="rect-alpha" className="text-xs">
+          <Label htmlFor="rect-alpha" className="text-xs text-primary">
             Alpha Threshold
           </Label>
           <Input
@@ -215,7 +215,7 @@ export function RectangularSettings({
       {/* Min Size */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-xs">Min Sprite Size (px)</Label>
+          <Label className="text-xs text-primary">Min Sprite Size (px)</Label>
           <Input
             type="number"
             min={1}

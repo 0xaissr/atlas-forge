@@ -59,7 +59,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-foreground">Grid Split</h3>
+      <h3 className="text-sm font-medium text-primary">Grid Split</h3>
       <p className="text-xs text-muted-foreground">
         以固定格線切割 spritesheet，適用於等寬等高的圖塊。
       </p>
@@ -67,7 +67,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
       {/* Cell Size */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="cell-width" className="text-xs">
+          <Label htmlFor="cell-width" className="text-xs text-primary">
             Cell Width
           </Label>
           <Input
@@ -80,7 +80,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="cell-height" className="text-xs">
+          <Label htmlFor="cell-height" className="text-xs text-primary">
             Cell Height
           </Label>
           <Input
@@ -97,7 +97,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
       {/* Offset */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="offset-x" className="text-xs">
+          <Label htmlFor="offset-x" className="text-xs text-primary">
             Offset X
           </Label>
           <Input
@@ -110,7 +110,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="offset-y" className="text-xs">
+          <Label htmlFor="offset-y" className="text-xs text-primary">
             Offset Y
           </Label>
           <Input
@@ -126,7 +126,7 @@ export function GridSettings({ image, fileName }: GridSettingsProps) {
 
       {/* Spacing */}
       <div className="space-y-1.5">
-        <Label htmlFor="spacing" className="text-xs">
+        <Label htmlFor="spacing" className="text-xs text-primary">
           Spacing
         </Label>
         <Input
