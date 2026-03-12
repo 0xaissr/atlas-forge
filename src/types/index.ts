@@ -45,4 +45,5 @@ export type SpriteAction =
   | { type: "SET_SPRITES"; sprites: SpriteRect[] }
   | { type: "DELETE_SPRITE"; id: string }
   | { type: "UPDATE_SPRITE"; id: string; updates: Partial<SpriteRect> }
-  | { type: "RENAME_SPRITE"; id: string; name: string };
+  | { type: "RENAME_SPRITE"; id: string; name: string }
+  | { type: "REORDER_SPRITES"; orderedIds: string[] };

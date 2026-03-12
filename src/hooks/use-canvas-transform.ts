@@ -122,6 +122,22 @@ export function useCanvasTransform() {
     }
   }, []);
 
+  const setScaleCentered = useCallback(
+    (newScale: number, containerWidth: number, containerHeight: number) => {
+      setTransform((prev) => {
+        const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+        // Zoom relative to container center
+        const cx = containerWidth / 2;
+        const cy = containerHeight / 2;
+        const ratio = clamped / prev.scale;
+        const newOffsetX = cx - (cx - prev.offsetX) * ratio;
+        const newOffsetY = cy - (cy - prev.offsetY) * ratio;
+        return { scale: clamped, offsetX: newOffsetX, offsetY: newOffsetY };
+      });
+    },
+    []
+  );
+
   return {
     scale: transform.scale,
     offsetX: transform.offsetX,
@@ -130,6 +146,7 @@ export function useCanvasTransform() {
     isSpaceHeld: isSpaceHeld.current,
     fitToContainer,
     resetToActual,
+    setScaleCentered,
     onWheel,
     onMouseDown,
     onMouseMove,

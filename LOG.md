@@ -26,3 +26,12 @@
 - [650284e] 改為純 client-side rendering 徹底解決 hydration 警告
 - [4f889fb] 移除 Web Worker 改為主線程直接執行偵測
 - [423d49a] 升級 Cocos plist 輸出至 format 3 並支援 format 3 解析
+- [d409adf] 新增 LOG.md 記錄所有變更歷史
+- [2657c79] 修復匯出檔名重複副檔名問題（fx_coins.png.png → fx_coins.png）
+- [4b1c0e1] 修正 plist 格式匹配 TexturePacker 標準輸出，解決 Cocos Creator 只顯示一個 spriteFrame
+- [d2c04e6] 移除首頁改為直接進入編輯器，支援多檔案頁籤切換
+- [759e963] 新增 Repack 預覽畫面和 BestFit 尺寸自動計算
+- [f7e3191] 修復切換 tab 導致 sprites 被重置，Export 預覽預設不顯示框線
+- [264979b] 修正下拉選單顯示 value 而非 label 的問題
+- [57ef95a] 設定 next.config 為靜態匯出模式，支援打包部署
+- [05f53b2] Sprites 列表改為可收合預設收合，頁籤和欄位標題改用主題色

@@ -10,7 +10,7 @@ describe("splitGrid", () => {
       cellHeight: 64,
       offsetX: 0,
       offsetY: 0,
-      spacing: 0,
+      spacingX: 0, spacingY: 0,
       fileName: "test",
     });
     expect(result).toHaveLength(4);
@@ -28,7 +28,7 @@ describe("splitGrid", () => {
       cellHeight: 64,
       offsetX: 10,
       offsetY: 10,
-      spacing: 4,
+      spacingX: 4, spacingY: 4,
       fileName: "sprite",
     });
     // 10 + 64 = 74, 74 + 4 + 64 = 142, 142 + 4 + 64 = 210 > 200 -> 2 columns
@@ -46,7 +46,7 @@ describe("splitGrid", () => {
       cellHeight: 64,
       offsetX: 0,
       offsetY: 0,
-      spacing: 0,
+      spacingX: 0, spacingY: 0,
       fileName: "tiny",
     });
     expect(result).toHaveLength(0);
@@ -60,7 +60,7 @@ describe("splitGrid", () => {
       cellHeight: 64,
       offsetX: 0,
       offsetY: 0,
-      spacing: 0,
+      spacingX: 0, spacingY: 0,
       fileName: "test",
     });
     const ids = result.map(r => r.id);

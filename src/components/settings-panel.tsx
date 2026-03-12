@@ -18,14 +18,14 @@ interface SettingsPanelProps {
 }
 
 const TAB_MAP: Record<string, SplitMode> = {
-  "0": "grid",
-  "1": "rectangular",
+  "0": "rectangular",
+  "1": "grid",
   "2": "datafile",
 };
 
 const MODE_TO_TAB: Record<SplitMode, string> = {
-  grid: "0",
-  rectangular: "1",
+  rectangular: "0",
+  grid: "1",
   datafile: "2",
 };
 
@@ -50,12 +50,12 @@ export function SettingsPanel({
         <div className="shrink-0 px-3 pt-3 pb-0">
           <TabsList className="w-full">
             <TabsTrigger value="0" className="flex items-center gap-1.5">
-              <Grid3X3 className="size-3.5" />
-              Grid
-            </TabsTrigger>
-            <TabsTrigger value="1" className="flex items-center gap-1.5">
               <Box className="size-3.5" />
               Rect
+            </TabsTrigger>
+            <TabsTrigger value="1" className="flex items-center gap-1.5">
+              <Grid3X3 className="size-3.5" />
+              Grid
             </TabsTrigger>
             <TabsTrigger value="2" className="flex items-center gap-1.5">
               <FileText className="size-3.5" />
@@ -66,11 +66,11 @@ export function SettingsPanel({
 
         <div className="flex-1 overflow-y-auto p-4">
           <TabsContent value="0">
-            <GridSettings image={image} fileName={fileName} />
+            <RectangularSettings image={image} fileName={fileName} onPickBgColor={onPickBgColor} bgColor={bgColor} />
           </TabsContent>
 
           <TabsContent value="1">
-            <RectangularSettings image={image} fileName={fileName} onPickBgColor={onPickBgColor} bgColor={bgColor} />
+            <GridSettings image={image} fileName={fileName} />
           </TabsContent>
 
           <TabsContent value="2">

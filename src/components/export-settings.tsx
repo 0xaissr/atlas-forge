@@ -159,11 +159,11 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-primary">Export Settings</h3>
+      <h3 className="text-sm font-medium text-highlight">Export Settings</h3>
 
       {/* Engine */}
       <div className="space-y-1.5">
-        <Label className="text-xs text-primary">Engine</Label>
+        <Label className="text-xs text-label">Engine</Label>
         <Select value={engine} onValueChange={(val) => setEngine(val as ExportEngine)}>
           <SelectTrigger className="w-full">
             {ENGINE_LABELS[engine]}
@@ -177,7 +177,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
 
       {/* Mode */}
       <div className="space-y-1.5">
-        <Label className="text-xs text-primary">Mode</Label>
+        <Label className="text-xs text-label">Mode</Label>
         <Select value={mode} onValueChange={(val) => setMode(val as ExportMode)}>
           <SelectTrigger className="w-full">
             {MODE_LABELS[mode]}
@@ -193,7 +193,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
       {mode === "repack" && (
         <div className="space-y-3 rounded-md border border-border p-3">
           <div className="space-y-1.5">
-            <Label className="text-xs text-primary">Max Size</Label>
+            <Label className="text-xs text-label">Max Size</Label>
             <Select
               value={sizeOption}
               onValueChange={(val) => { if (val) setSizeOption(val); }}
@@ -213,7 +213,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-primary">Padding</Label>
+            <Label className="text-xs text-label">Padding</Label>
             <Input
               type="number"
               min={0}
@@ -233,7 +233,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
               onCheckedChange={(checked) => setTrim(checked === true)}
               id="trim-checkbox"
             />
-            <Label htmlFor="trim-checkbox" className="text-xs text-primary cursor-pointer">
+            <Label htmlFor="trim-checkbox" className="text-xs text-label cursor-pointer">
               Trim transparent pixels
             </Label>
           </div>
@@ -248,7 +248,7 @@ export function ExportSettings({ image, fileName, sprites, onPreviewChange, onSh
               }}
               id="show-borders-checkbox"
             />
-            <Label htmlFor="show-borders-checkbox" className="text-xs text-primary cursor-pointer">
+            <Label htmlFor="show-borders-checkbox" className="text-xs text-label cursor-pointer">
               Show sprite borders
             </Label>
           </div>

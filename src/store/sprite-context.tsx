@@ -25,6 +25,11 @@ export function spriteReducer(
         s.id === action.id ? { ...s, name: action.name } : s
       );
 
+    case "REORDER_SPRITES": {
+      const map = new Map(state.map((s) => [s.id, s]));
+      return action.orderedIds.map((id) => map.get(id)!).filter(Boolean);
+    }
+
     default:
       return state;
   }

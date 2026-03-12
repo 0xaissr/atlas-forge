@@ -6,10 +6,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { CanvasPreview } from "@/components/canvas-preview";
 import { SettingsPanel } from "@/components/settings-panel";
 import { SpriteList } from "@/components/sprite-list";
+import { AnimationPreview } from "@/components/animation-preview";
 import { ExportSettings, type RepackPreview } from "@/components/export-settings";
 import { SpriteProvider, useSprites } from "@/store/sprite-context";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scissors, Download, X, Plus } from "lucide-react";
+import { Scissors, Download, X, Plus, Film, List } from "lucide-react";
 import type { SplitMode, SpriteRect } from "@/types";
 
 interface TabData {
@@ -17,22 +18,26 @@ interface TabData {
   image: HTMLImageElement;
   fileName: string;
   sprites: SpriteRect[];
+  activePanel: string;
 }
 
-let tabCounter = 0;
+let tabCounter = Date.now();
 
 function EditorContent({
   image,
   fileName,
+  activeMainTab,
+  onMainTabChange,
 }: {
   image: HTMLImageElement;
   fileName: string;
+  activeMainTab: string;
+  onMainTabChange: (tab: string) => void;
 }) {
-  const [splitMode, setSplitMode] = useState<SplitMode>("grid");
+  const [splitMode, setSplitMode] = useState<SplitMode>("rectangular");
   const [selectedSpriteId, setSelectedSpriteId] = useState<string | null>(null);
   const [pickingBgColor, setPickingBgColor] = useState(false);
   const [bgColor, setBgColor] = useState<[number, number, number] | null>(null);
-  const [activeMainTab, setActiveMainTab] = useState("split");
   const [repackPreview, setRepackPreview] = useState<RepackPreview | null>(null);
   const [showRepackBorders, setShowRepackBorders] = useState(false);
   const { sprites, dispatch, undo, redo, canUndo, canRedo } = useSprites();
@@ -76,44 +81,129 @@ function EditorContent({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedSpriteId, dispatch, undo, redo, canUndo, canRedo]);
 
+  // Bottom panel system
+  const [bottomPanel, setBottomPanel] = useState<"animation" | "sprites" | null>("animation");
+  const [bottomHeight, setBottomHeight] = useState(220);
+  const resizingRef = useRef(false);
+  const startYRef = useRef(0);
+  const startHeightRef = useRef(0);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizingRef.current = true;
+    startYRef.current = e.clientY;
+    startHeightRef.current = bottomHeight;
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!resizingRef.current) return;
+      const delta = startYRef.current - ev.clientY;
+      setBottomHeight(Math.max(120, Math.min(500, startHeightRef.current + delta)));
+    };
+    const handleMouseUp = () => {
+      resizingRef.current = false;
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  }, [bottomHeight]);
+
+  const togglePanel = useCallback((panel: "animation" | "sprites") => {
+    setBottomPanel((prev) => (prev === panel ? null : panel));
+  }, []);
+
   return (
     <>
-      {/* Canvas */}
-      <div className="relative min-h-[40vh] flex-1 md:min-h-0">
-        {pickingBgColor && (
-          <div className="absolute inset-0 z-10 flex cursor-crosshair items-center justify-center bg-black/30">
-            <span className="rounded bg-black/70 px-3 py-1.5 text-sm text-white">
-              Click on the background to pick color
-            </span>
+      {/* Main area: canvas + bottom panels */}
+      <div className="flex flex-1 flex-col min-h-0 min-w-0">
+        {/* Canvas */}
+        <div className="relative flex-1 min-h-[100px]">
+          {pickingBgColor && (
+            <div className="absolute inset-0 z-10 flex cursor-crosshair items-center justify-center bg-black/30 pointer-events-none">
+              <span className="rounded bg-black/70 px-3 py-1.5 text-sm text-white">
+                Click on the background to pick color
+              </span>
+            </div>
+          )}
+          <CanvasPreview
+            image={canvasImage}
+            sprites={canvasSprites}
+            selectedSpriteId={showRepack ? null : selectedSpriteId}
+            onSpriteSelect={(id) => {
+              if (pickingBgColor || showRepack) return;
+              setSelectedSpriteId(id);
+            }}
+            dispatch={dispatch}
+            onCanvasClick={pickingBgColor ? (x, y) => {
+              const canvas = document.createElement("canvas");
+              canvas.width = image.naturalWidth;
+              canvas.height = image.naturalHeight;
+              const ctx = canvas.getContext("2d")!;
+              ctx.drawImage(image, 0, 0);
+              const px = Math.round(Math.max(0, Math.min(x, image.naturalWidth - 1)));
+              const py = Math.round(Math.max(0, Math.min(y, image.naturalHeight - 1)));
+              const pixel = ctx.getImageData(px, py, 1, 1).data;
+              setBgColor([pixel[0], pixel[1], pixel[2]]);
+              setPickingBgColor(false);
+            } : undefined}
+          />
+        </div>
+
+        {/* Bottom panel system */}
+        <div className="flex shrink-0 border-t border-border">
+          {/* Icon bar */}
+          <div className="flex flex-col items-center gap-1 border-r border-border bg-card/80 px-1 py-2">
+            <button
+              onClick={() => togglePanel("animation")}
+              className={`rounded p-1.5 transition-colors ${
+                bottomPanel === "animation"
+                  ? "bg-highlight text-white"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+              title="Animation Preview"
+            >
+              <Film className="size-4" />
+            </button>
+            <button
+              onClick={() => togglePanel("sprites")}
+              className={`rounded p-1.5 transition-colors ${
+                bottomPanel === "sprites"
+                  ? "bg-highlight text-white"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+              title="Sprites"
+            >
+              <List className="size-4" />
+            </button>
           </div>
-        )}
-        <CanvasPreview
-          image={canvasImage}
-          sprites={canvasSprites}
-          selectedSpriteId={showRepack ? null : selectedSpriteId}
-          onSpriteSelect={(id) => {
-            if (pickingBgColor || showRepack) return;
-            setSelectedSpriteId(id);
-          }}
-          dispatch={dispatch}
-          onCanvasClick={pickingBgColor ? (x, y) => {
-            const canvas = document.createElement("canvas");
-            canvas.width = image.naturalWidth;
-            canvas.height = image.naturalHeight;
-            const ctx = canvas.getContext("2d")!;
-            ctx.drawImage(image, 0, 0);
-            const px = Math.round(Math.max(0, Math.min(x, image.naturalWidth - 1)));
-            const py = Math.round(Math.max(0, Math.min(y, image.naturalHeight - 1)));
-            const pixel = ctx.getImageData(px, py, 1, 1).data;
-            setBgColor([pixel[0], pixel[1], pixel[2]]);
-            setPickingBgColor(false);
-          } : undefined}
-        />
+
+          {/* Panel content */}
+          {bottomPanel && (
+            <div className="flex flex-1 flex-col min-w-0" style={{ height: bottomHeight }}>
+              {/* Resize handle */}
+              <div
+                onMouseDown={handleResizeStart}
+                className="h-1 cursor-ns-resize bg-border hover:bg-primary/50 transition-colors"
+              />
+              {/* Animation preview */}
+              <div className={`flex-1 min-h-0 ${bottomPanel !== "animation" ? "hidden" : ""}`}>
+                <AnimationPreview image={image} />
+              </div>
+              {/* Sprites list */}
+              <div className={`flex-1 min-h-0 overflow-y-auto ${bottomPanel !== "sprites" ? "hidden" : ""}`}>
+                <SpriteList
+                  selectedSpriteId={selectedSpriteId}
+                  setSelectedSpriteId={setSelectedSpriteId}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right Panel */}
       <div className="flex w-full flex-col border-t border-border bg-card/80 backdrop-blur-sm md:h-full md:w-80 md:border-l md:border-t-0">
-        <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="flex flex-1 flex-col overflow-hidden">
+        <Tabs value={activeMainTab} onValueChange={onMainTabChange} className="flex flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b border-border px-3 pt-2 pb-0">
             <TabsList className="w-full">
               <TabsTrigger value="split" className="flex items-center gap-1.5">
@@ -138,12 +228,6 @@ function EditorContent({
               onPickBgColor={() => setPickingBgColor(true)}
               bgColor={bgColor}
             />
-            <div className="shrink-0 border-t border-border">
-              <SpriteList
-                selectedSpriteId={selectedSpriteId}
-                setSelectedSpriteId={setSelectedSpriteId}
-              />
-            </div>
           </div>
 
           <div className={`mt-0 flex-1 overflow-y-auto p-4 ${activeMainTab !== "export" ? "hidden" : ""}`}>
@@ -180,7 +264,7 @@ export default function App() {
 
   const addTab = useCallback((img: HTMLImageElement, name: string) => {
     const id = `tab-${++tabCounter}`;
-    const newTab: TabData = { id, image: img, fileName: name, sprites: [] };
+    const newTab: TabData = { id, image: img, fileName: name, sprites: [], activePanel: "split" };
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(id);
   }, []);
@@ -210,6 +294,12 @@ export default function App() {
   const handleSpritesChange = useCallback((tabId: string, sprites: SpriteRect[]) => {
     setTabs((prev) =>
       prev.map((t) => (t.id === tabId ? { ...t, sprites } : t))
+    );
+  }, []);
+
+  const handlePanelChange = useCallback((tabId: string, panel: string) => {
+    setTabs((prev) =>
+      prev.map((t) => (t.id === tabId ? { ...t, activePanel: panel } : t))
     );
   }, []);
 
@@ -253,7 +343,7 @@ export default function App() {
               onClick={() => setActiveTabId(tab.id)}
               className={`group flex h-8 items-center gap-1.5 rounded-t-md border border-b-0 px-3 text-xs font-medium transition-colors ${
                 tab.id === activeTabId
-                  ? "border-border bg-background text-foreground"
+                  ? "border-border bg-highlight text-white"
                   : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground"
               }`}
             >
@@ -290,17 +380,23 @@ export default function App() {
 
       {/* Main area */}
       <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
-        {activeTab ? (
+        {tabs.length === 0 && <EmptyState onImageLoaded={addTab} />}
+        {tabs.map((tab) => (
           <SpriteProvider
-            key={activeTab.id}
-            initialSprites={activeTab.sprites}
-            onSpritesChange={(sprites) => handleSpritesChange(activeTab.id, sprites)}
+            key={tab.id}
+            initialSprites={tab.sprites}
+            onSpritesChange={(sprites) => handleSpritesChange(tab.id, sprites)}
           >
-            <EditorContent image={activeTab.image} fileName={activeTab.fileName} />
+            <div className={`flex flex-1 flex-col overflow-hidden md:flex-row ${tab.id !== activeTabId ? "hidden" : ""}`}>
+              <EditorContent
+                image={tab.image}
+                fileName={tab.fileName}
+                activeMainTab={tab.activePanel}
+                onMainTabChange={(panel) => handlePanelChange(tab.id, panel)}
+              />
+            </div>
           </SpriteProvider>
-        ) : (
-          <EmptyState onImageLoaded={addTab} />
-        )}
+        ))}
       </div>
     </div>
   );

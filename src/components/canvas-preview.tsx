@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { SpriteAction, SpriteRect } from "@/types";
 import { useCanvasTransform } from "@/hooks/use-canvas-transform";
 import { useSpriteInteraction } from "@/hooks/use-sprite-interaction";
@@ -66,6 +66,7 @@ export function CanvasPreview({
     isSpaceHeld,
     fitToContainer,
     resetToActual,
+    setScaleCentered,
     onWheel,
     onMouseDown: onPanMouseDown,
     onMouseMove: onPanMouseMove,
@@ -231,7 +232,9 @@ export function CanvasPreview({
   }, []);
 
   // Auto-fit on initial load
+  const hasInitialFit = useRef(false);
   useEffect(() => {
+    if (hasInitialFit.current) return;
     const container = containerRef.current;
     if (!container || !image) return;
 
@@ -239,6 +242,7 @@ export function CanvasPreview({
       const { width, height } = containerSizeRef.current;
       if (width > 0 && height > 0) {
         fitToContainer(image.width, image.height, width, height);
+        hasInitialFit.current = true;
       }
     }, 50);
 
@@ -291,10 +295,13 @@ export function CanvasPreview({
     [onPanMouseUp, onInteractionMouseUp]
   );
 
+  const [zoomMode, setZoomMode] = useState<"fit" | "actual" | "custom">("fit");
+
   const handleFit = useCallback(() => {
     const { width, height } = containerSizeRef.current;
     if (width > 0 && height > 0) {
       fitToContainer(image.width, image.height, width, height);
+      setZoomMode("fit");
     }
   }, [fitToContainer, image]);
 
@@ -302,8 +309,25 @@ export function CanvasPreview({
     const { width, height } = containerSizeRef.current;
     if (width > 0 && height > 0) {
       resetToActual(width, height, image.width, image.height);
+      setZoomMode("actual");
     }
   }, [resetToActual, image]);
+
+  const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const percent = Number(e.target.value);
+    const newScale = percent / 100;
+    const { width, height } = containerSizeRef.current;
+    if (width > 0 && height > 0) {
+      setScaleCentered(newScale, width, height);
+      setZoomMode("custom");
+    }
+  }, [setScaleCentered]);
+
+  // Mark custom when user scrolls to zoom
+  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
+    onWheel(e);
+    setZoomMode("custom");
+  }, [onWheel]);
 
   const zoomPercent = Math.round(scale * 100);
 
@@ -312,8 +336,8 @@ export function CanvasPreview({
       <canvas
         ref={canvasRef}
         className="absolute inset-0"
-        style={{ cursor }}
-        onWheel={onWheel}
+        style={{ cursor: onCanvasClick ? "crosshair" : cursor }}
+        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -322,25 +346,43 @@ export function CanvasPreview({
       />
 
       {/* Bottom status bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 flex items-center px-3 gap-4 text-xs font-mono bg-card/90 border-t border-border text-muted-foreground backdrop-blur-sm">
+      <div className="absolute bottom-0 left-0 right-0 h-8 flex items-center px-3 gap-3 text-xs font-mono bg-card/90 border-t border-border text-amber-400 backdrop-blur-sm">
         <span>
           {image.width} x {image.height}
         </span>
         <span>{sprites.length} sprites</span>
-        <span>{zoomPercent}%</span>
-        <div className="ml-auto flex gap-1">
-          <button
-            onClick={handleFit}
-            className="px-2 py-0.5 rounded text-xs border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            Fit
-          </button>
-          <button
-            onClick={handleActual}
-            className="px-2 py-0.5 rounded text-xs border border-border hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            1:1
-          </button>
+        <div className="ml-auto flex items-center gap-2">
+          <input
+            type="range"
+            min={10}
+            max={500}
+            value={zoomPercent}
+            onChange={handleSliderChange}
+            className="h-1 w-20 cursor-pointer accent-amber-400"
+          />
+          <span className="w-10 text-right">{zoomPercent}%</span>
+          <div className="flex gap-1">
+            <button
+              onClick={handleFit}
+              className={`px-2 py-0.5 rounded text-xs border transition-colors ${
+                zoomMode === "fit"
+                  ? "bg-highlight border-highlight text-white"
+                  : "border-border hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              Fit
+            </button>
+            <button
+              onClick={handleActual}
+              className={`px-2 py-0.5 rounded text-xs border transition-colors ${
+                zoomMode === "actual"
+                  ? "bg-highlight border-highlight text-white"
+                  : "border-border hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              1:1
+            </button>
+          </div>
         </div>
       </div>
     </div>

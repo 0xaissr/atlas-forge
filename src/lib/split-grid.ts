@@ -7,7 +7,8 @@ export interface SplitGridParams {
   cellHeight: number;
   offsetX: number;
   offsetY: number;
-  spacing: number;
+  spacingX: number;
+  spacingY: number;
   fileName: string;
 }
 
@@ -23,15 +24,16 @@ export function splitGrid(params: SplitGridParams): SpriteRect[] {
     cellHeight,
     offsetX,
     offsetY,
-    spacing,
+    spacingX,
+    spacingY,
     fileName,
   } = params;
 
   const sprites: SpriteRect[] = [];
   let index = 0;
 
-  for (let y = offsetY; y + cellHeight <= imageHeight; y += cellHeight + spacing) {
-    for (let x = offsetX; x + cellWidth <= imageWidth; x += cellWidth + spacing) {
+  for (let y = offsetY; y + cellHeight <= imageHeight; y += cellHeight + spacingY) {
+    for (let x = offsetX; x + cellWidth <= imageWidth; x += cellWidth + spacingX) {
       sprites.push({
         id: `grid-${index}`,
         name: `${fileName}-${index}`,

@@ -14,7 +14,7 @@ export function SpriteList({
   setSelectedSpriteId,
 }: SpriteListProps) {
   const { sprites, dispatch } = useSprites();
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,7 +83,7 @@ export function SpriteList({
           尚無 Sprite 資料
         </div>
       )}
-      <div className={`overflow-y-auto max-h-60 ${collapsed ? "hidden" : ""}`}>
+      <div className={`overflow-y-auto flex-1 ${collapsed ? "hidden" : ""}`}>
         {sprites.map((sprite) => {
           const isSelected = sprite.id === selectedSpriteId;
           const isEditing = sprite.id === editingId;
