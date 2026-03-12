@@ -249,7 +249,7 @@ function EmptyState({ onImageLoaded }: { onImageLoaded: (img: HTMLImageElement, 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-[var(--canvas-bg)] p-8 gap-6">
       <div className="flex flex-col items-center gap-3">
-        <img src="/assets/icon/icon.png" alt="AtlasForge" className="h-48 w-auto rounded-xl" />
+        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/assets/icon/icon.png`} alt="AtlasForge" className="h-48 w-auto rounded-xl" />
         <span className="font-[family-name:var(--font-orbitron)] text-2xl font-semibold tracking-wide text-highlight">
           SpriteSheet to Atlas
         </span>

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   description:
     "Split spritesheets into individual sprites and export as Cocos Creator or Unity texture atlas. Supports grid, rectangular detection, data file import, and animation preview.",
   icons: {
-    icon: "/assets/icon/favicon.svg",
+    icon: `${process.env.NODE_ENV === "production" ? "/atlas-forge" : ""}/assets/icon/favicon.svg`,
   },
 };
 
