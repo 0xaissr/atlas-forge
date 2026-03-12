@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AtlasForge — Spritesheet to Atlas Converter
 
-## Getting Started
+將 spritesheet 切割並匯出為 Cocos Creator (.plist) 或 Unity (.png.meta) 的 texture atlas。
 
-First, run the development server:
+## 功能
+
+- **Rect 自動偵測** — 自動辨識 sprite 邊界，支援背景色取樣
+- **Grid 切割** — 等寬等高格線切割，支援 offset 和 spacing
+- **Data File 匯入** — 支援 TexturePacker JSON 和 Cocos plist 格式
+- **動畫預覽** — 逐幀播放、timeline 縮圖拖拽排序
+- **Repack 模式** — MaxRects BSSF bin packing，BestFit 自動尺寸
+- **多檔案頁籤** — 同時編輯多個 spritesheet
+- **Cyberpunk 主題** — 深色/淺色模式切換
+
+## Tech Stack
+
+- Next.js 16 + TypeScript + Tailwind CSS + shadcn/ui
+- Pure client-side rendering
+- Canvas API + Vitest
+
+## 使用
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 打包部署
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx next build
+# 靜態檔案產出在 out/ 資料夾
+cd out && python3 -m http.server 8080
+```

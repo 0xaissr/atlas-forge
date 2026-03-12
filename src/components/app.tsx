@@ -247,10 +247,31 @@ function EditorContent({
 
 function EmptyState({ onImageLoaded }: { onImageLoaded: (img: HTMLImageElement, name: string) => void }) {
   return (
-    <div className="flex flex-1 items-center justify-center bg-[var(--canvas-bg)] p-8">
+    <div className="flex flex-1 flex-col items-center justify-center bg-[var(--canvas-bg)] p-8 gap-6">
+      <div className="flex flex-col items-center gap-3">
+        <img src="/assets/icon/icon.png" alt="AtlasForge" className="h-48 w-auto rounded-xl" />
+        <span className="font-[family-name:var(--font-orbitron)] text-2xl font-semibold tracking-wide text-highlight">
+          SpriteSheet to Atlas
+        </span>
+      </div>
       <div className="w-full max-w-md">
         <ImageUploader onImageLoaded={onImageLoaded} />
       </div>
+      {/* Footer */}
+      <footer className="flex flex-col items-center gap-2 pt-4">
+        <span className="text-xs text-muted-foreground">by 0xaissr</span>
+        <div className="flex items-center gap-3">
+          <a href="https://github.com/0xaissr/atlas-forge" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" title="GitHub">
+            <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+          <a href="https://www.threads.net/@aissr.lab" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" title="Threads">
+            <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.432 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.2 1.48-.69 2.61-1.475 3.388-.97.963-2.323 1.452-4.02 1.452-1.266 0-2.364-.353-3.18-1.024-.89-.73-1.38-1.774-1.38-2.94 0-2.11 1.646-3.633 3.915-3.633.946 0 1.777.258 2.404.727-.003-.822-.07-1.596-.207-2.312l2.018-.39c.207 1.073.293 2.248.254 3.498.762.496 1.394 1.12 1.86 1.87.627 1.008.934 2.197.934 3.534 0 .69-.077 1.334-.225 1.927-.589 2.342-2.186 4.039-4.676 4.967-1.396.52-3.003.79-4.762.807zm.538-8.563c-1.34 0-1.985.726-1.985 1.517 0 .463.206.87.58 1.14.418.306.993.46 1.71.46 1.073 0 1.943-.289 2.584-.862.463-.413.772-1.003.93-1.756-.57-.32-1.2-.499-1.819-.499z"/></svg>
+          </a>
+          <a href="https://instagram.com/aissr.lab" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors" title="Instagram">
+            <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -327,11 +348,13 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Header */}
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-sm">
-        <h1 className="font-[family-name:var(--font-jetbrains-mono)] text-lg font-bold tracking-tight text-foreground dark:text-primary dark:drop-shadow-[0_0_8px_var(--color-primary)]">
-          Spritesheet to Atlas
+      <header className="relative flex h-12 shrink-0 items-center justify-center border-b border-border bg-card/80 px-4 backdrop-blur-sm">
+        <h1 className="font-[family-name:var(--font-orbitron)] text-lg font-bold tracking-wide text-foreground dark:text-primary dark:drop-shadow-[0_0_8px_var(--color-primary)]">
+          AtlasForge
         </h1>
-        <ThemeToggle />
+        <div className="absolute right-4">
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Tab bar */}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono, Orbitron } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -18,12 +18,17 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Spritesheet to Atlas - Texture Atlas Generator",
+  title: "AtlasForge — Spritesheet to Atlas Converter",
   description:
-    "Split spritesheets into individual sprites and export as Cocos Creator or Unity texture atlas. Supports grid, rectangular detection, and data file import.",
+    "Split spritesheets into individual sprites and export as Cocos Creator or Unity texture atlas. Supports grid, rectangular detection, data file import, and animation preview.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/assets/icon/favicon.svg",
   },
 };
 
@@ -35,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="zh-TW" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} ${orbitron.variable} antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider>
